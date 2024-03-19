@@ -32,9 +32,9 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/rqb_local # Zmieniono z localhost na rqb_local
-    username: postgres # Domyślny użytkownik dla PostgreSQL
-    password: admin # Hasło ustawiłeś podczas uruchamiania kontenera
+    url: jdbc:postgresql://localhost:5432/rqb_local
+    username: postgres
+    password: admin
     hikari:
       poolName: Hikari
       auto-commit: false

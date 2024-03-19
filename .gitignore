@@ -11,3 +11,6 @@ tmp/
 
 # Dane środowiska
 .env
+
+# wynikowe
+target/

@@ -1,0 +1,11 @@
+{
+  "groups": [
+    {
+      "name": "application",
+      "type": "com.uni.questionview.config.ApplicationProperties",
+      "sourceType": "com.uni.questionview.config.ApplicationProperties"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}

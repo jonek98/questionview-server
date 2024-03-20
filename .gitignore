@@ -14,3 +14,6 @@ tmp/
 
 # wynikowe
 target/
+
+# IDEA
+.idea/

@@ -1,0 +1,20 @@
+# Logi
+*.log
+
+# Katalogi zależności
+node_modules/
+bower_components/
+
+# Katalogi budowania
+dist/
+tmp/
+
+# Dane środowiska
+.env
+
+# wynikowe
+target/
+
+.DS_Store
+
+.idea/

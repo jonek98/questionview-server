@@ -3,16 +3,24 @@ package com.uni.questionview.domain.entity;
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Setter
+@Getter
 @Entity
 @Table(name="question")
 public class QuestionEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
     private long id;
 
     private String answerText;

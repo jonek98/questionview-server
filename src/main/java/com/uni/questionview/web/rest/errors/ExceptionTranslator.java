@@ -2,6 +2,7 @@ package com.uni.questionview.web.rest.errors;
 
 import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
 
+import com.uni.questionview.service.exceptions.UsernameAlreadyUsedException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Arrays;
@@ -82,13 +83,13 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler {
 
     private ProblemDetailWithCause getProblemDetailWithCause(Throwable ex) {
         if (
-            ex instanceof com.uni.questionview.service.UsernameAlreadyUsedException
+            ex instanceof UsernameAlreadyUsedException
         ) return (ProblemDetailWithCause) new LoginAlreadyUsedException().getBody();
         if (
-            ex instanceof com.uni.questionview.service.EmailAlreadyUsedException
+            ex instanceof com.uni.questionview.service.exceptions.EmailAlreadyUsedException
         ) return (ProblemDetailWithCause) new EmailAlreadyUsedException().getBody();
         if (
-            ex instanceof com.uni.questionview.service.InvalidPasswordException
+            ex instanceof com.uni.questionview.service.exceptions.InvalidPasswordException
         ) return (ProblemDetailWithCause) new InvalidPasswordException().getBody();
 
         if (

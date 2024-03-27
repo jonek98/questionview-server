@@ -13,6 +13,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.uni.questionview.service.exceptions.EmailAlreadyUsedException;
+import com.uni.questionview.service.exceptions.InvalidPasswordException;
+import com.uni.questionview.service.exceptions.UsernameAlreadyUsedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;

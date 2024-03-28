@@ -15,9 +15,12 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
+    private final QuestionMapper questionMapper;
+
     @Autowired
-    public QuestionService(QuestionRepository questionRepository) {
+    public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper) {
         this.questionRepository = questionRepository;
+        this.questionMapper = questionMapper;
     }
 
     public List<QuestionDTO> getAllQuestions() {
@@ -28,8 +31,14 @@ public class QuestionService {
     }
 
     public QuestionDTO addQuestion(QuestionDTO questionDTO) {
-        QuestionEntity questionEntity = QuestionMapper.mapQuestionDTOToQuestionEntity(questionDTO);
+        QuestionEntity questionEntity = questionMapper.mapQuestionDTOToQuestionEntity(questionDTO);
 
         return QuestionMapper.mapQuestionEntityToQuestionDTO(questionRepository.save(questionEntity));
+    }
+
+    public boolean removeQuestion(long questionId) {
+        questionRepository.deleteById(questionId);
+
+        return questionRepository.existsById(questionId);
     }
 }

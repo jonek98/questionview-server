@@ -3,10 +3,14 @@ package com.uni.questionview.domain.entity;
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -34,28 +38,40 @@ public class QuestionEntity {
     @SequenceGenerator(name = "sequenceGenerator")
     private long id;
 
+    @Column(name = "answertext")
     private String answerText;
 
+    @Column(name = "questiontext")
     private String questionText;
 
+    @Column(name = "difficultylevel")
     private int difficultyLevel;
 
     private Status status;
 
+    @Column(name = "statuschangereason")
     private String statusChaneReason;
 
     private String summary;
 
     private Language language;
 
+    @Column(name = "timeestimate")
     private int timeEstimate;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "question_tag", joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns =
     @JoinColumn(name = "tag_id"))
-    private Set<com.uni.questionview.domain.entity.TagEntity> tags = new HashSet<>();
+    private List<TagEntity> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
-    private Set<com.uni.questionview.domain.entity.ActionEntity> actions;
+    private Set<ActionEntity> actions;
+
+    public Set<Long> getTagIds() {
+        return this.tags
+                .stream()
+                .map(TagEntity::getId)
+                .collect(Collectors.toSet());
+    }
 
 }

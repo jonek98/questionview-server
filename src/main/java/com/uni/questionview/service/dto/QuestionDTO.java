@@ -15,6 +15,8 @@ import java.util.Set;
 @AllArgsConstructor(staticName = "of")
 public class QuestionDTO {
 
+    private long id;
+
     private String answerText;
 
     private String questionText;
@@ -31,8 +33,6 @@ public class QuestionDTO {
 
     private int timeEstimate;
 
-    private Set<TagEntity> tags;
-
-    private Set<ActionEntity> actions;
+    private Set<Long> tagIds;
 
 }

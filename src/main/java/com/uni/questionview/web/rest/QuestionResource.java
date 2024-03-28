@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("/api/question")
 public class QuestionResource {
 
-    private final Logger log = LoggerFactory.getLogger(UserResource.class);
+    private final Logger log = LoggerFactory.getLogger(QuestionResource.class);
 
     private final QuestionService questionService;
 

@@ -1,12 +1,7 @@
 package com.uni.questionview.service.mapper;
 
-import com.uni.questionview.domain.Authority;
-import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.QuestionEntity;
-import com.uni.questionview.service.dto.AdminUserDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
-
-import java.util.Set;
 
 public class QuestionMapper {
 

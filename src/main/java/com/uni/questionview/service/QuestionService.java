@@ -4,9 +4,7 @@ import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.mapper.QuestionMapper;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

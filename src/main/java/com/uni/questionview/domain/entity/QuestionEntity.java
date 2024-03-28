@@ -2,20 +2,31 @@ package com.uni.questionview.domain.entity;
 
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Setter
 @Getter
 @Entity
-@Table(name="question")
+@Table(name = "question")
 public class QuestionEntity {
 
     @Id
@@ -40,11 +51,11 @@ public class QuestionEntity {
     private int timeEstimate;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(name = "question_tag",
-            joinColumns = @JoinColumn(name = "question_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<TagEntity> tags = new HashSet<>();
+    @JoinTable(name = "question_tag", joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns =
+    @JoinColumn(name = "tag_id"))
+    private Set<com.uni.questionview.domain.entity.TagEntity> tags = new HashSet<>();
+
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
-    private Set<ActionEntity> actions;
+    private Set<com.uni.questionview.domain.entity.ActionEntity> actions;
 
 }

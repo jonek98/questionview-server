@@ -36,6 +36,12 @@ public class QuestionService {
         return QuestionMapper.mapQuestionEntityToQuestionDTO(questionRepository.save(questionEntity));
     }
 
+    public QuestionDTO getQuestion(Long questionId) {
+        return questionRepository.findById(questionId)
+                .map(QuestionMapper::mapQuestionEntityToQuestionDTO)
+                .orElseThrow();
+    }
+
     public boolean removeQuestion(long questionId) {
         questionRepository.deleteById(questionId);
 

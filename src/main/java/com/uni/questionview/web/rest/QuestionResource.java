@@ -48,4 +48,12 @@ public class QuestionResource {
 
         return new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.OK);
     }
+
+    @PostMapping("/getQuestion/{questionId}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable long questionId) {
+        log.debug("REST get question by id: {}", questionId);
+
+        return new ResponseEntity<>(questionService.getQuestion(questionId), HttpStatus.OK);
+    }
 }

@@ -4,7 +4,6 @@ import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -59,7 +57,7 @@ public class QuestionEntity {
     @Column(name = "timeestimate")
     private int timeEstimate;
 
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinTable(name = "question_tag", joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns =
     @JoinColumn(name = "tag_id"))
     private List<TagEntity> tags = new ArrayList<>();
@@ -67,6 +65,7 @@ public class QuestionEntity {
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private Set<ActionEntity> actions;
 
+    //@Transactional
     public Set<Long> getTagIds() {
         return this.tags
                 .stream()

@@ -6,7 +6,6 @@ import com.uni.questionview.domain.Status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -64,13 +63,5 @@ public class QuestionEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private Set<ActionEntity> actions;
-
-    //@Transactional
-    public Set<Long> getTagIds() {
-        return this.tags
-                .stream()
-                .map(TagEntity::getId)
-                .collect(Collectors.toSet());
-    }
 
 }

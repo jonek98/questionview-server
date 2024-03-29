@@ -8,30 +8,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TagService {
 
     private final TagRepository tagRepository;
 
-    private final TagMapper tagMapper;
-
     @Autowired
-    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+    public TagService(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
-        this.tagMapper = tagMapper;
-    }
+}
 
     public List<TagDTO> getAllTags() {
         return tagRepository.findAll()
                 .stream()
-                .map(tagMapper::mapTagEntityToTagDTO)
-                .collect(Collectors.toList());
+                .map(TagMapper::mapToTagDTO)
+                .toList();
     }
 
     public TagDTO createTag(TagDTO tagDTO) {
-        tagRepository.save(tagMapper.mapToTagEntity(tagDTO));
+        tagRepository.save(TagMapper.mapToTagEntity(tagDTO));
 
         return tagDTO;
     }

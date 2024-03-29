@@ -2,13 +2,12 @@ package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
-import com.uni.questionview.domain.entity.ActionEntity;
-import com.uni.questionview.domain.entity.TagEntity;
+
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -33,6 +32,6 @@ public class QuestionDTO {
 
     private int timeEstimate;
 
-    private Set<Long> tagIds;
+    private List<TagDTO> tags;
 
 }

@@ -26,19 +26,19 @@ public class QuestionService {
     public List<QuestionDTO> getAllQuestions() {
         return questionRepository.findAll()
                 .stream()
-                .map(QuestionMapper::mapQuestionEntityToQuestionDTO)
+                .map(QuestionMapper::mapToQuestionDTO)
                 .toList();
     }
 
     public QuestionDTO addQuestion(QuestionDTO questionDTO) {
         QuestionEntity questionEntity = questionMapper.mapQuestionDTOToQuestionEntity(questionDTO);
 
-        return QuestionMapper.mapQuestionEntityToQuestionDTO(questionRepository.save(questionEntity));
+        return QuestionMapper.mapToQuestionDTO(questionRepository.save(questionEntity));
     }
 
     public QuestionDTO getQuestion(Long questionId) {
         return questionRepository.findById(questionId)
-                .map(QuestionMapper::mapQuestionEntityToQuestionDTO)
+                .map(QuestionMapper::mapToQuestionDTO)
                 .orElseThrow();
     }
 

@@ -4,6 +4,7 @@ import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.domain.entity.TagEntity;
 import com.uni.questionview.repository.TagRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.TagDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,17 +14,12 @@ import java.util.List;
 @Service
 public class QuestionMapper {
 
-    private final TagRepository tagRepository;
 
-    @Autowired
-    public QuestionMapper(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
-
-    public static QuestionDTO mapQuestionEntityToQuestionDTO(QuestionEntity questionEntity) {
+    public static QuestionDTO mapToQuestionDTO(QuestionEntity questionEntity) {
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
-        else
+        else {
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
             return QuestionDTO.of(
                     questionEntity.getId(),
                     questionEntity.getAnswerText(),
@@ -34,11 +30,15 @@ public class QuestionMapper {
                     questionEntity.getSummary(),
                     questionEntity.getLanguage(),
                     questionEntity.getTimeEstimate(),
-                    questionEntity.getTagIds());
+                    tagDTOS);
+
+        }
     }
 
     public QuestionEntity mapQuestionDTOToQuestionEntity(QuestionDTO questionDTO) {
-        List<TagEntity> questionTags = tagRepository.findByIdIn(questionDTO.getTagIds());
+        List<TagEntity> questionTags = questionDTO.getTags()
+                .stream()
+                .map(TagMapper::mapToTagEntity).toList();
 
         QuestionEntity questionEntity = new QuestionEntity();
         questionEntity.setAnswerText(questionDTO.getAnswerText());

@@ -18,16 +18,19 @@ public class QuestionMapper {
 
     private final ActionMapper actionMapper;
 
+    private final TagMapper tagMapper;
+
     @Autowired
-    public QuestionMapper(ActionMapper actionMapper) {
+    public QuestionMapper(ActionMapper actionMapper, TagMapper tagMapper) {
         this.actionMapper = actionMapper;
+        this.tagMapper = tagMapper;
     }
 
     public QuestionDTO mapToQuestionDTO(QuestionEntity questionEntity) {
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
         else {
-            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
             List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(actionMapper::mapToActionDTO).toList();
             return QuestionDTO.of(
                     questionEntity.getId(),
@@ -48,7 +51,7 @@ public class QuestionMapper {
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
         else {
-            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
             return SimplifiedQuestionDTO.of(
                     questionEntity.getId(),
                     questionEntity.getSummary(),
@@ -63,7 +66,7 @@ public class QuestionMapper {
     public QuestionEntity mapToQuestionEntity(QuestionDTO questionDTO) {
         List<TagEntity> questionTags = questionDTO.getTags()
                 .stream()
-                .map(TagMapper::mapToTagEntity).toList();
+                .map(tagMapper::mapToTagEntity).toList();
 
         List<ActionEntity> actionEntities = questionDTO.getActions()
                 .stream()

@@ -1,5 +1,6 @@
 package com.uni.questionview.service;
 
+import com.uni.questionview.domain.entity.TagEntity;
 import com.uni.questionview.repository.TagRepository;
 import com.uni.questionview.service.dto.TagDTO;
 import com.uni.questionview.service.mapper.TagMapper;
@@ -14,22 +15,25 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
+    private final TagMapper tagMapper;
+
     @Autowired
-    public TagService(TagRepository tagRepository) {
+    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
         this.tagRepository = tagRepository;
-}
+        this.tagMapper = tagMapper;
+    }
 
     public List<TagDTO> getAllTags() {
         return tagRepository.findAll()
                 .stream()
-                .map(TagMapper::mapToTagDTO)
+                .map(tagMapper::mapToTagDTO)
                 .toList();
     }
 
     public TagDTO createTag(TagDTO tagDTO) {
-        tagRepository.save(TagMapper.mapToTagEntity(tagDTO));
+        TagEntity savedTag = tagRepository.save(tagMapper.mapToTagEntity(tagDTO));
 
-        return tagDTO;
+        return tagMapper.mapToTagDTO(savedTag);
     }
 
     public boolean removeTag(Long tagId) {

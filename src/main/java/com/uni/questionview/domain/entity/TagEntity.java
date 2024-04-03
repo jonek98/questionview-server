@@ -22,6 +22,4 @@ public class TagEntity {
     @Column(name = "taglabel")
     private String tagLabel;
 
-    private String status;
-
 }

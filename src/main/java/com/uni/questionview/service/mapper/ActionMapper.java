@@ -7,6 +7,7 @@ import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.UserDTO;
+import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,17 +35,16 @@ public class ActionMapper {
                 userDTO);
     }
 
-
     public ActionEntity mapToActionEntity(ActionDTO actionDTO) {
         User user = userRepository.findOneByLogin(actionDTO.getUser().getLogin()).orElseThrow();
-        QuestionEntity questionEntity = questionRepository.findById(actionDTO.getQuestionId());
+        QuestionEntity questionEntity = questionRepository.findById(actionDTO.getQuestionId())
+                .orElseThrow(() -> new QuestionNotFoundException("Question not found: " + actionDTO.getQuestionId()));
 
-        ActionEntity actionEntity = new ActionEntity();
-        actionEntity.setActionType(actionDTO.getActionType());
-        actionEntity.setQuestion(questionEntity);
-        actionEntity.setComment(actionDTO.getComment());
-        actionEntity.setUser(user);
-
-        return actionEntity;
+        return ActionEntity.builder()
+                .actionType(actionDTO.getActionType())
+                .question(questionEntity)
+                .comment(actionDTO.getComment())
+                .user(user)
+                .build();
     }
 }

@@ -9,10 +9,13 @@ import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
+import com.uni.questionview.service.exceptions.QuestionNotFoundException;
+import com.uni.questionview.service.exceptions.UserNotFoundException;
 import com.uni.questionview.service.mapper.QuestionMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -43,25 +46,26 @@ public class QuestionService {
                 .toList();
     }
 
+    @Transactional
     public QuestionDTO addQuestion(QuestionDTO questionDTO, String userName) {
-        QuestionEntity questionEntityToSave = questionMapper.mapToQuestionEntity(questionDTO);
+        User user = userRepository.findOneByLogin(userName)
+                .orElseThrow(() -> new UserNotFoundException("User not found with login: " + userName));
 
+        QuestionEntity questionEntityToSave = questionMapper.mapToQuestionEntity(questionDTO);
         QuestionEntity savedQuestion = questionRepository.save(questionEntityToSave);
 
-        User user = userRepository.findOneByLogin(userName).orElseThrow();
+        ActionEntity actionEntity = ActionEntity.builder()
+                .question(savedQuestion)
+                .user(user)
+                .actionType(ActionType.QUESTION_ADD)
+                .comment("User " + userName + " has created a question")
+                .build();
+        actionRepository.save(actionEntity);
 
-        ActionEntity actionEntity = new ActionEntity();
-        actionEntity.setQuestion(savedQuestion);
-        actionEntity.setUser(user);
-        actionEntity.setActionType(ActionType.QUESTION_ADD);
-        actionEntity.setComment("User " + userName + " has created question");
+        QuestionEntity updatedQuestion = questionRepository.findById(savedQuestion.getId())
+                .orElseThrow(() -> new QuestionNotFoundException("Question not found after saving: " + savedQuestion.getId()));
 
-        ActionEntity savedActionEntity = actionRepository.save(actionEntity);
-
-        if(savedActionEntity != null)
-            savedQuestion.setActions(List.of(actionEntity));
-
-        return questionMapper.mapToQuestionDTO(savedQuestion);
+        return questionMapper.mapToQuestionDTO(updatedQuestion);
     }
 
     public QuestionDTO getQuestion(Long questionId) {

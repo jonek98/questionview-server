@@ -73,18 +73,17 @@ public class QuestionMapper {
                 .map(actionMapper::mapToActionEntity)
                 .toList();
 
-        QuestionEntity questionEntity = new QuestionEntity();
-        questionEntity.setAnswerText(questionDTO.getAnswerText());
-        questionEntity.setQuestionText(questionDTO.getQuestionText());
-        questionEntity.setDifficultyLevel(questionDTO.getDifficultyLevel());
-        questionEntity.setStatus(questionDTO.getStatus());
-        questionEntity.setStatusChaneReason(questionDTO.getStatusChaneReason());
-        questionEntity.setSummary(questionDTO.getSummary());
-        questionEntity.setLanguage(questionDTO.getLanguage());
-        questionEntity.setTimeEstimate(questionDTO.getTimeEstimate());
-        questionEntity.setTags(questionTags);
-        questionEntity.setActions(actionEntities);
-
-        return questionEntity;
+        return QuestionEntity.builder()
+                .answerText(questionDTO.getAnswerText())
+                .questionText(questionDTO.getQuestionText())
+                .difficultyLevel(questionDTO.getDifficultyLevel())
+                .status(questionDTO.getStatus())
+                .statusChaneReason(questionDTO.getStatusChaneReason())
+                .summary(questionDTO.getSummary())
+                .language(questionDTO.getLanguage())
+                .timeEstimate(questionDTO.getTimeEstimate())
+                .tags(questionTags)
+                .actions(actionEntities)
+                .build();
     }
 }

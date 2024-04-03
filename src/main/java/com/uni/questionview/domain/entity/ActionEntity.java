@@ -2,12 +2,18 @@ package com.uni.questionview.domain.entity;
 
 import com.uni.questionview.domain.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import com.uni.questionview.domain.ActionType;
 
+@Builder
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "action")
 public class ActionEntity {
 

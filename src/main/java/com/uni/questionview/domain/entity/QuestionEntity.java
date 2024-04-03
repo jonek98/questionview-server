@@ -5,7 +5,6 @@ import com.uni.questionview.domain.Status;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,13 +19,17 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 
-@Setter
 @Getter
+@Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "question")
 public class QuestionEntity {
 
@@ -63,5 +66,4 @@ public class QuestionEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     private List<ActionEntity> actions;
-
 }

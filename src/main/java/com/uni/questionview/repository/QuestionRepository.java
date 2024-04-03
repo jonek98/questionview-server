@@ -14,8 +14,6 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface QuestionRepository extends JpaRepository<QuestionEntity, Long> {
 
-    QuestionEntity findById(long questionId);
-
     @Query(value = "SELECT * FROM question q WHERE q.id IN (SELECT qu.question_id FROM user_question qu WHERE qu.user_id = :userId)", nativeQuery = true)
     List<QuestionEntity> findQuestionsFromUserList(@Param("userId") Long userId);
 

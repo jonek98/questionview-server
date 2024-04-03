@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,7 +53,7 @@ public class QuestionResource {
     public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO) {
         log.debug("REST post to add new Questions");
 
-        return new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.addQuestion(questionDTO, getCurrentUserName()), HttpStatus.CREATED);
     }
 
     @GetMapping("/getQuestion/{questionId}")
@@ -87,4 +89,11 @@ public class QuestionResource {
 //        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId, userId), HttpStatus.OK);
 //    }
 
+    private String getCurrentUserName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        throw new RuntimeException("User not found");
+    }
 }

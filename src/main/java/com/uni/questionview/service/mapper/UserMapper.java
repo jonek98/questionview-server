@@ -21,10 +21,10 @@ import org.springframework.stereotype.Service;
 public class UserMapper {
 
     public List<UserDTO> usersToUserDTOs(List<User> users) {
-        return users.stream().filter(Objects::nonNull).map(this::userToUserDTO).toList();
+        return users.stream().filter(Objects::nonNull).map(UserMapper::userToUserDTO).toList();
     }
 
-    public UserDTO userToUserDTO(User user) {
+    public static UserDTO userToUserDTO(User user) {
         return new UserDTO(user);
     }
 

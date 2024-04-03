@@ -1,8 +1,10 @@
 package com.uni.questionview.service;
 
+import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 import com.uni.questionview.service.mapper.QuestionMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +25,35 @@ public class QuestionService {
         this.questionMapper = questionMapper;
     }
 
-    public List<QuestionDTO> getAllQuestions() {
+    public List<SimplifiedQuestionDTO> getAllQuestions() {
         return questionRepository.findAll()
                 .stream()
-                .map(QuestionMapper::mapToQuestionDTO)
+                .map(questionMapper::mapToSimplifiedQuestionDTO)
                 .toList();
     }
 
     public QuestionDTO addQuestion(QuestionDTO questionDTO) {
-        QuestionEntity questionEntity = questionMapper.mapQuestionDTOToQuestionEntity(questionDTO);
+        QuestionEntity questionEntityToSave = questionMapper.mapToQuestionEntity(questionDTO);
 
-        return QuestionMapper.mapToQuestionDTO(questionRepository.save(questionEntity));
+        return questionMapper.mapToQuestionDTO(questionRepository.save(questionEntityToSave));
     }
 
     public QuestionDTO getQuestion(Long questionId) {
         return questionRepository.findById(questionId)
-                .map(QuestionMapper::mapToQuestionDTO)
+                .map(questionMapper::mapToQuestionDTO)
                 .orElseThrow();
+    }
+
+    public List<QuestionDTO> getQuestionsFromUserList(long userId) {
+        return questionRepository.findQuestionsFromUserList(userId)
+                .stream()
+                .map(questionMapper::mapToQuestionDTO)
+                .toList();
+    }
+
+    public boolean removeQuestionFromUserList(long questionId, long userId) {
+        questionRepository.deleteQuestionFromUserList(questionId, userId);
+        return questionRepository.checkQuestionUserAssociationExists(questionId, userId) == 0;
     }
 
     public boolean removeQuestion(long questionId) {

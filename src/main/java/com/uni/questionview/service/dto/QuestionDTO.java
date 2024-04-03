@@ -34,4 +34,5 @@ public class QuestionDTO {
 
     private List<TagDTO> tags;
 
+    private List<ActionDTO> actions;
 }

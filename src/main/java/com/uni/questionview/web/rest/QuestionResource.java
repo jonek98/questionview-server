@@ -1,22 +1,24 @@
 package com.uni.questionview.web.rest;
 
-import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.security.AuthoritiesConstants;
+import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
-import com.uni.questionview.service.dto.AdminUserDTO;
+import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,14 +30,17 @@ public class QuestionResource {
 
     private final QuestionService questionService;
 
+    private final ActionService actionService;
+
     @Autowired
-    public QuestionResource(QuestionService questionService) {
+    public QuestionResource(QuestionService questionService, ActionService actionService) {
         this.questionService = questionService;
+        this.actionService = actionService;
     }
 
     @GetMapping("/allQuestions")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestions() {
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getAllQuestions() {
         log.debug("REST request to get all Questions");
 
         return new ResponseEntity<>(questionService.getAllQuestions(), HttpStatus.OK);
@@ -46,14 +51,40 @@ public class QuestionResource {
     public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO) {
         log.debug("REST post to add new Questions");
 
-        return new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.CREATED);
     }
 
-    @PostMapping("/getQuestion/{questionId}")
+    @GetMapping("/getQuestion/{questionId}")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<QuestionDTO> getQuestion(@PathVariable long questionId) {
         log.debug("REST get question by id: {}", questionId);
 
         return new ResponseEntity<>(questionService.getQuestion(questionId), HttpStatus.OK);
     }
+
+    @PostMapping("/addAction")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<ActionDTO> addAction(@RequestBody ActionDTO actionDTO) {
+       log.debug("REST add {} action to question with questionId: {}", actionDTO.getActionType(), actionDTO.getQuestionId());
+
+        return new ResponseEntity<>(actionService.addAction(actionDTO), HttpStatus.CREATED);
+    }
+
+    //TODO: change this
+//    @GetMapping("/userQuestionsList/{userId}")
+//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+//    public ResponseEntity<List<QuestionDTO>> getQuestionsFromUserList(@PathVariable long userId) {
+//        log.debug("REST get questions from user list {}", userId);
+//
+//        return new ResponseEntity<>(questionService.getQuestionsFromUserList(userId), HttpStatus.OK);
+//    }
+//
+//    @DeleteMapping("/deleteFromUserList/{userId}/{questionId}")
+//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+//    public ResponseEntity<Boolean> removeQuestionFromUserList(@PathVariable long userId, @PathVariable long questionId) {
+//        log.debug("REST delete question with id {} from user list", questionId);
+//
+//        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId, userId), HttpStatus.OK);
+//    }
+
 }

@@ -2,26 +2,28 @@ package com.uni.questionview.domain.entity;
 
 import com.uni.questionview.domain.User;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import com.uni.questionview.domain.ActionType;
 
+@Data
 @Entity
 @Table(name = "action")
 public class ActionEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
     private long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "actiontype")
     private ActionType actionType;
-
-    private String newStatus;
 
     private String comment;
 
-    private Boolean newUserVote;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idQuestion", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idquestion", referencedColumnName = "id")
     private QuestionEntity question;
 
     @ManyToOne

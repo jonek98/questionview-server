@@ -61,7 +61,7 @@ public class QuestionEntity {
     @JoinColumn(name = "tag_id"))
     private List<TagEntity> tags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
-    private Set<ActionEntity> actions;
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    private List<ActionEntity> actions;
 
 }

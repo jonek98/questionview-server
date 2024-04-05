@@ -42,6 +42,7 @@ public class QuestionMapper {
                     questionEntity.getSummary(),
                     questionEntity.getLanguage(),
                     questionEntity.getTimeEstimate(),
+                    0,
                     tagDTOS,
                     actionDTOS);
         }

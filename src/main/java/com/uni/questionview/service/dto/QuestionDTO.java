@@ -32,6 +32,9 @@ public class QuestionDTO {
 
     private int timeEstimate;
 
+    //TODO: zrobic obsluge ratingu
+    private double rating;
+
     private List<TagDTO> tags;
 
     private List<ActionDTO> actions;

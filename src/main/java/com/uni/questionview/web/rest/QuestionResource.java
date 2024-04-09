@@ -87,7 +87,7 @@ public class QuestionResource {
 
     @PostMapping("/addQuestionToUserList")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<SimplifiedQuestionDTO>> addQuestionToUserList(Long questionId) {
+    public ResponseEntity<List<SimplifiedQuestionDTO>> addQuestionToUserList(@RequestParam long questionId) {
         String currentUserName = getCurrentUserName();
         log.debug("REST get user {} question list", currentUserName);
 

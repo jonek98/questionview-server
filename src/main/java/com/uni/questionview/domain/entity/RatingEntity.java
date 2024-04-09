@@ -1,43 +1,40 @@
 package com.uni.questionview.domain.entity;
 
 import com.uni.questionview.domain.User;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import com.uni.questionview.domain.ActionType;
-
-import java.time.LocalDate;
-import java.util.Date;
 
 @Builder
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "action")
-public class ActionEntity {
+@Table(name = "rating")
+public class RatingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
     private long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "actiontype")
-    private ActionType actionType;
-
-    private String comment;
-
-    private LocalDate date;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idquestion", referencedColumnName = "id")
-    private QuestionEntity question;
+    @Max(5)
+    @Min(1)
+    private int rating;
 
     @ManyToOne
-    @JoinColumn(name = "iduser")
     private User user;
+
+    @ManyToOne
+    @JoinTable(
+            name = "question_rating",
+            joinColumns = @JoinColumn(name = "rating_id"),
+            inverseJoinColumns = @JoinColumn(name = "question_id")
+    )
+    private QuestionEntity question;
 }

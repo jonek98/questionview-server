@@ -5,6 +5,7 @@ import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 
 import org.slf4j.Logger;
@@ -15,12 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -72,22 +68,39 @@ public class QuestionResource {
         return new ResponseEntity<>(actionService.addAction(actionDTO), HttpStatus.CREATED);
     }
 
-    //TODO: change this
-//    @GetMapping("/userQuestionsList/{userId}")
-//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-//    public ResponseEntity<List<QuestionDTO>> getQuestionsFromUserList(@PathVariable long userId) {
-//        log.debug("REST get questions from user list {}", userId);
-//
-//        return new ResponseEntity<>(questionService.getQuestionsFromUserList(userId), HttpStatus.OK);
-//    }
-//
-//    @DeleteMapping("/deleteFromUserList/{userId}/{questionId}")
-//    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-//    public ResponseEntity<Boolean> removeQuestionFromUserList(@PathVariable long userId, @PathVariable long questionId) {
-//        log.debug("REST delete question with id {} from user list", questionId);
-//
-//        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId, userId), HttpStatus.OK);
-//    }
+    @PostMapping("/addRating")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<RatingDTO> addRating(@RequestBody RatingDTO ratingDTO) {
+        log.debug("REST add rating to question with id: {}", ratingDTO.getQuestionId());
+
+        return new ResponseEntity<>(questionService.addRating(ratingDTO.withUserName(getCurrentUserName())), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/userQuestionList")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getQuestionsFromUserList() {
+        String currentUserName = getCurrentUserName();
+        log.debug("REST get user {} question list", currentUserName);
+
+        return new ResponseEntity<>(questionService.getQuestionsFromUserList(currentUserName), HttpStatus.OK);
+    }
+
+    @PostMapping("/addQuestionToUserList")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> addQuestionToUserList(Long questionId) {
+        String currentUserName = getCurrentUserName();
+        log.debug("REST get user {} question list", currentUserName);
+
+        return new ResponseEntity<>(questionService.addQuestionToUserList(currentUserName, questionId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/removeQuestionFromUserList")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> removeQuestionFromUserList(@RequestParam long questionId) {
+        log.debug("REST delete question with id {} from user list", questionId);
+        String currentUserName = getCurrentUserName();
+        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId, currentUserName), HttpStatus.OK);
+    }
 
     private String getCurrentUserName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

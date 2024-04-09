@@ -42,7 +42,7 @@ public class QuestionMapper {
                     questionEntity.getSummary(),
                     questionEntity.getLanguage(),
                     questionEntity.getTimeEstimate(),
-                    0,
+                    questionEntity.calculateRating(),
                     tagDTOS,
                     actionDTOS);
         }
@@ -59,7 +59,7 @@ public class QuestionMapper {
                     questionEntity.getLanguage(),
                     questionEntity.getDifficultyLevel(),
                     questionEntity.getTimeEstimate(),
-                    0, //TODO: dodac obsluge ratingu
+                    questionEntity.calculateRating(),
                     tagDTOS);
         }
     }

@@ -1,11 +1,13 @@
 package com.uni.questionview.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.uni.questionview.domain.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,6 +58,10 @@ public class QuestionEntity {
 
     private Language language;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    private List<RatingEntity> ratings;
+
     @Column(name = "timeestimate")
     private int timeEstimate;
 
@@ -66,4 +72,27 @@ public class QuestionEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     private List<ActionEntity> actions;
+
+    @JsonIgnore
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_question", joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns =
+    @JoinColumn(name = "user_id"))
+    private List<User> usersWithQuestionOnList;
+
+    public double calculateRating() {
+        return this.ratings
+            .stream()
+            .map(RatingEntity::getRating)
+            .mapToInt(Integer::intValue)
+            .average()
+            .orElse(Double.NaN);
+    }
+
+    public boolean checkIfQuestionIsOnUserList(Long userId) {
+        return this.getUsersWithQuestionOnList()
+            .stream()
+            .map(User::getId)
+            .toList()
+            .contains(userId);
+    }
 }

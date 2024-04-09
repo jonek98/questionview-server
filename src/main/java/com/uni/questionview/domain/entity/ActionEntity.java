@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 
 import com.uni.questionview.domain.ActionType;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Builder
 @Data
 @Entity
@@ -27,6 +30,8 @@ public class ActionEntity {
     private ActionType actionType;
 
     private String comment;
+
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idquestion", referencedColumnName = "id")

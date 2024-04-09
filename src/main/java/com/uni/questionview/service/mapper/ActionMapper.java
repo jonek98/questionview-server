@@ -31,6 +31,7 @@ public class ActionMapper {
         return ActionDTO.of(
                 actionEntity.getActionType(),
                 actionEntity.getComment(),
+                actionEntity.getDate(),
                 actionEntity.getQuestion().getId(),
                 userDTO);
     }
@@ -44,6 +45,7 @@ public class ActionMapper {
                 .actionType(actionDTO.getActionType())
                 .question(questionEntity)
                 .comment(actionDTO.getComment())
+                .date(actionDTO.getDate())
                 .user(user)
                 .build();
     }

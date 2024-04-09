@@ -56,6 +56,9 @@ public class QuestionEntity {
 
     private Language language;
 
+    @ManyToMany(mappedBy = "questions")
+    private List<RatingEntity> ratings;
+
     @Column(name = "timeestimate")
     private int timeEstimate;
 

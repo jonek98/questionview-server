@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -59,6 +60,7 @@ public class QuestionService {
                 .user(user)
                 .actionType(ActionType.QUESTION_ADD)
                 .comment("User " + userName + " has created a question")
+                .date(LocalDate.now())
                 .build();
         actionRepository.save(actionEntity);
 

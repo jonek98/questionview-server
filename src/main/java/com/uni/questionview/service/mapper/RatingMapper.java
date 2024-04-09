@@ -28,7 +28,7 @@ public class RatingMapper {
             .ratingId(ratingEntity.getId())
             .rating(ratingEntity.getRating())
             .questionId(ratingEntity.getQuestion().getId())
-            .userId(ratingEntity.getUser().getId())
+            .userName(ratingEntity.getUser().getLogin())
             .build();
     }
 
@@ -36,8 +36,8 @@ public class RatingMapper {
         QuestionEntity questionEntity = questionRepository.findById(ratingDTO.getQuestionId())
             .orElseThrow(() -> new QuestionNotFoundException("Question with id not found: " + ratingDTO.getQuestionId()));
 
-        User user = userRepository.findById(ratingDTO.getUserId())
-            .orElseThrow(() -> new UserNotFoundException("User with id not found: " + ratingDTO.getUserId()));
+        User user = userRepository.findOneByLogin(ratingDTO.getUserName())
+            .orElseThrow(() -> new UserNotFoundException("User with not found: " + ratingDTO.getUserName()));
 
         return RatingEntity.builder()
             .rating(ratingDTO.getRating())

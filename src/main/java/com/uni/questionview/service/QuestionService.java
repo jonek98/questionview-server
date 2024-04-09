@@ -92,7 +92,7 @@ public class QuestionService {
 
         if(userAlreadyRatedQuestion(ratingEntityToSave))
             throw new UserAlreadyRatedQuestionException("User " + ratingEntityToSave.getUser().getLogin()
-                + " already rated question with id: " + ratingEntityToSave.getQuestion().getId());
+                + " has already rated the question with id: " + ratingEntityToSave.getQuestion().getId());
 
         return ratingMapper.mapToDto(ratingRepository.save(ratingEntityToSave));
     }

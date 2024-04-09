@@ -78,7 +78,7 @@ public class QuestionResource {
     public ResponseEntity<RatingDTO> addRating(@RequestBody RatingDTO ratingDTO) {
         log.debug("REST add rating to question with id: {}", ratingDTO.getQuestionId());
 
-        return new ResponseEntity<>(questionService.addRating(ratingDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.addRating(ratingDTO.withUserName(getCurrentUserName())), HttpStatus.CREATED);
     }
 
     //TODO: change this

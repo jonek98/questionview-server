@@ -12,6 +12,7 @@ import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
+import com.uni.questionview.service.exceptions.QuestionAlreadyOnUserList;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 import com.uni.questionview.service.exceptions.UserAlreadyRatedQuestionException;
 import com.uni.questionview.service.exceptions.UserNotFoundException;
@@ -97,16 +98,49 @@ public class QuestionService {
         return ratingMapper.mapToDto(ratingRepository.save(ratingEntityToSave));
     }
 
-    public List<QuestionDTO> getQuestionsFromUserList(long userId) {
-        return questionRepository.findQuestionsFromUserList(userId)
-                .stream()
-                .map(questionMapper::mapToQuestionDTO)
-                .toList();
+    public List<SimplifiedQuestionDTO> getQuestionsFromUserList(String userName) {
+        User user = userRepository.findOneByLogin(userName)
+            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
+
+        return questionRepository.findAll()
+            .stream()
+            .filter(question -> question.checkIfQuestionIsOnUserList(user.getId()))
+            .map(questionMapper::mapToSimplifiedQuestionDTO)
+            .toList();
     }
 
-    public boolean removeQuestionFromUserList(long questionId, long userId) {
-        questionRepository.deleteQuestionFromUserList(questionId, userId);
-        return questionRepository.checkQuestionUserAssociationExists(questionId, userId) == 0;
+    public List<SimplifiedQuestionDTO> addQuestionToUserList(String userName, long questionId) {
+        User user = userRepository.findOneByLogin(userName)
+            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
+        QuestionEntity questionEntity = questionRepository.findById(questionId)
+            .orElseThrow(() -> new RuntimeException("Question with id: "+ questionId + " not found"));
+
+        if (questionEntity.getUsersWithQuestionOnList().contains(user)) {
+            throw new QuestionAlreadyOnUserList( "User '" + user.getLogin() + "' has already on list the question with ID: " + questionId);
+        }
+
+        questionEntity.getUsersWithQuestionOnList().add(user);
+
+        questionRepository.save(questionEntity);
+
+        return getQuestionsFromUserList(user.getLogin());
+    }
+
+    public List<SimplifiedQuestionDTO> removeQuestionFromUserList(long questionId, String userName) {
+        User user = userRepository.findOneByLogin(userName)
+            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
+        QuestionEntity questionEntity = questionRepository.findById(questionId)
+            .orElseThrow(() -> new RuntimeException("Question with id: "+ questionId + " not found"));
+
+        if (!questionEntity.getUsersWithQuestionOnList().contains(user)) {
+            throw new IllegalArgumentException( "User '" + user.getLogin() + "' has not question with ID: " + questionId + " on their list");
+        }
+
+        questionEntity.getUsersWithQuestionOnList().remove(user);
+
+        questionRepository.save(questionEntity);
+
+        return getQuestionsFromUserList(user.getLogin());
     }
 
     public boolean removeQuestion(long questionId) {

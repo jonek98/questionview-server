@@ -1,5 +1,6 @@
 package com.uni.questionview.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
@@ -56,7 +57,8 @@ public class QuestionEntity {
 
     private Language language;
 
-    @ManyToMany(mappedBy = "questions")
+    @JsonIgnore
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     private List<RatingEntity> ratings;
 
     @Column(name = "timeestimate")
@@ -69,4 +71,13 @@ public class QuestionEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     private List<ActionEntity> actions;
+
+    public double calculateRating() {
+        return this.ratings
+            .stream()
+            .map(RatingEntity::getRating)
+            .mapToInt(Integer::intValue)
+            .average()
+            .orElse(Double.NaN);
+    }
 }

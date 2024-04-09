@@ -4,15 +4,20 @@ import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
+import com.uni.questionview.domain.entity.RatingEntity;
 import com.uni.questionview.repository.ActionRepository;
 import com.uni.questionview.repository.QuestionRepository;
+import com.uni.questionview.repository.RatingRepository;
 import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
+import com.uni.questionview.service.exceptions.UserAlreadyRatedQuestionException;
 import com.uni.questionview.service.exceptions.UserNotFoundException;
 import com.uni.questionview.service.mapper.QuestionMapper;
 
+import com.uni.questionview.service.mapper.RatingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +36,19 @@ public class QuestionService {
 
     private final ActionRepository actionRepository;
 
+    private final RatingRepository ratingRepository;
+
+    private final RatingMapper ratingMapper;
+
     @Autowired
     public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper,
-            UserRepository userRepository, ActionRepository actionRepository) {
+                           UserRepository userRepository, ActionRepository actionRepository, RatingRepository ratingRepository, RatingMapper ratingMapper) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.userRepository = userRepository;
         this.actionRepository = actionRepository;
+        this.ratingRepository = ratingRepository;
+        this.ratingMapper = ratingMapper;
     }
 
     public List<SimplifiedQuestionDTO> getAllQuestions() {
@@ -76,6 +87,16 @@ public class QuestionService {
                 .orElseThrow();
     }
 
+    public RatingDTO addRating(RatingDTO ratingDTO) {
+        RatingEntity ratingEntityToSave = ratingMapper.mapToEntity(ratingDTO);
+
+        if(userAlreadyRatedQuestion(ratingEntityToSave))
+            throw new UserAlreadyRatedQuestionException("User " + ratingEntityToSave.getUser().getLogin()
+                + " already rated question with id: " + ratingEntityToSave.getQuestion().getId());
+
+        return ratingMapper.mapToDto(ratingRepository.save(ratingEntityToSave));
+    }
+
     public List<QuestionDTO> getQuestionsFromUserList(long userId) {
         return questionRepository.findQuestionsFromUserList(userId)
                 .stream()
@@ -92,5 +113,10 @@ public class QuestionService {
         questionRepository.deleteById(questionId);
 
         return questionRepository.existsById(questionId);
+    }
+
+    private boolean userAlreadyRatedQuestion(RatingEntity ratingEntity) {
+        return ratingRepository
+            .existsByUserIdAndQuestionId(ratingEntity.getUser().getId(), ratingEntity.getQuestion().getId());
     }
 }

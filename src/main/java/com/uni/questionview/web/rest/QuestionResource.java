@@ -5,6 +5,7 @@ import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 
 import org.slf4j.Logger;
@@ -70,6 +71,14 @@ public class QuestionResource {
        log.debug("REST add {} action to question with questionId: {}", actionDTO.getActionType(), actionDTO.getQuestionId());
 
         return new ResponseEntity<>(actionService.addAction(actionDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/addRating")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<RatingDTO> addRating(@RequestBody RatingDTO ratingDTO) {
+        log.debug("REST add rating to question with id: {}", ratingDTO.getQuestionId());
+
+        return new ResponseEntity<>(questionService.addRating(ratingDTO), HttpStatus.CREATED);
     }
 
     //TODO: change this

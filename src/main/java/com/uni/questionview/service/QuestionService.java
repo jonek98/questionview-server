@@ -10,6 +10,7 @@ import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.repository.RatingRepository;
 import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 import com.uni.questionview.service.exceptions.QuestionAlreadyOnUserList;
@@ -85,6 +86,12 @@ public class QuestionService {
     public QuestionDTO getQuestion(Long questionId) {
         return questionRepository.findById(questionId)
                 .map(questionMapper::mapToQuestionDTO)
+                .orElseThrow();
+    }
+
+    public QuestionDetailsDTO getQuestionDetails(Long questionId, String currentUserName) {
+        return questionRepository.findById(questionId)
+                .map(question -> questionMapper.mapToQuestionDetailsDTO(question, currentUserName))
                 .orElseThrow();
     }
 

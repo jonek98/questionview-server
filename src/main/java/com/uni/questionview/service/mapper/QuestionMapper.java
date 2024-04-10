@@ -1,10 +1,13 @@
 package com.uni.questionview.service.mapper;
 
+import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.domain.entity.TagEntity;
+import com.uni.questionview.repository.UserRepository;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 import com.uni.questionview.service.dto.TagDTO;
 
@@ -20,10 +23,13 @@ public class QuestionMapper {
 
     private final TagMapper tagMapper;
 
+    private final UserRepository userRepository;
+
     @Autowired
-    public QuestionMapper(ActionMapper actionMapper, TagMapper tagMapper) {
+    public QuestionMapper(ActionMapper actionMapper, TagMapper tagMapper, UserRepository userRepository) {
         this.actionMapper = actionMapper;
         this.tagMapper = tagMapper;
+        this.userRepository = userRepository;
     }
 
     public QuestionDTO mapToQuestionDTO(QuestionEntity questionEntity) {
@@ -45,6 +51,32 @@ public class QuestionMapper {
                     questionEntity.calculateRating(),
                     tagDTOS,
                     actionDTOS);
+        }
+    }
+
+    public QuestionDetailsDTO mapToQuestionDetailsDTO(QuestionEntity questionEntity, String currentUserName) {
+        User user = userRepository.findOneByLogin(currentUserName)
+                .orElseThrow(() -> new RuntimeException("User with userName: " + currentUserName +" not found"));
+
+        if (questionEntity == null)
+            throw new NullPointerException("QuestionEntity is null!");
+        else {
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
+            List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(actionMapper::mapToActionDTO).toList();
+            return QuestionDetailsDTO.of(
+                    questionEntity.getId(),
+                    questionEntity.getAnswerText(),
+                    questionEntity.getQuestionText(),
+                    questionEntity.getDifficultyLevel(),
+                    questionEntity.getStatus(),
+                    questionEntity.getStatusChaneReason(),
+                    questionEntity.getSummary(),
+                    questionEntity.getLanguage(),
+                    questionEntity.getTimeEstimate(),
+                    questionEntity.calculateRating(),
+                    tagDTOS,
+                    actionDTOS,
+                    questionEntity.checkIfQuestionIsOnUserList(user.getId()));
         }
     }
 

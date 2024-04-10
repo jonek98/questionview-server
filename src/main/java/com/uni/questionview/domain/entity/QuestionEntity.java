@@ -5,7 +5,6 @@ import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +80,6 @@ public class QuestionEntity {
     @JoinTable(name = "user_question", joinColumns = @JoinColumn(name = "question_id"), inverseJoinColumns =
     @JoinColumn(name = "user_id"))
     private List<User> usersWithQuestionOnList;
-
 
     public List<RatingEntity> getRatings() {
         return Optional.ofNullable(ratings)

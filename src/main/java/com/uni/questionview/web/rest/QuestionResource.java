@@ -5,6 +5,7 @@ import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
+import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.RatingDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 
@@ -58,6 +59,14 @@ public class QuestionResource {
         log.debug("REST get question by id: {}", questionId);
 
         return new ResponseEntity<>(questionService.getQuestion(questionId), HttpStatus.OK);
+    }
+
+    @GetMapping("/getQuestionDetails/{questionId}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDetailsDTO> getQuestionDetails(@PathVariable long questionId) {
+        log.debug("REST get question by id: {}", questionId);
+
+        return new ResponseEntity<>(questionService.getQuestionDetails(questionId, getCurrentUserName()), HttpStatus.OK);
     }
 
     @PostMapping("/addAction")

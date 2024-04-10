@@ -5,7 +5,10 @@ import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.uni.questionview.domain.User;
 import jakarta.persistence.CascadeType;
@@ -79,8 +82,13 @@ public class QuestionEntity {
     @JoinColumn(name = "user_id"))
     private List<User> usersWithQuestionOnList;
 
+
+    public List<RatingEntity> getRatings() {
+        return Optional.ofNullable(ratings)
+                .orElse(Collections.emptyList());
+    }
     public double calculateRating() {
-        return this.ratings
+        return getRatings()
             .stream()
             .map(RatingEntity::getRating)
             .mapToInt(Integer::intValue)

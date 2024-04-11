@@ -15,7 +15,7 @@ public class SimplifiedQuestionDTO {
     private Language language;
     private int difficulty;
     private int timeEstimate;
-    //TODO: zrobic obsluge ratingu
     private double rating;
     private List<TagDTO> tags;
+    boolean onUserList;
 }

@@ -89,9 +89,9 @@ public class QuestionService {
                 .orElseThrow();
     }
 
-    public QuestionDetailsDTO getQuestionDetails(Long questionId, String currentUserName) {
+    public QuestionDetailsDTO getQuestionDetails(Long questionId) {
         return questionRepository.findById(questionId)
-                .map(question -> questionMapper.mapToQuestionDetailsDTO(question, currentUserName))
+                .map(questionMapper::mapToQuestionDetailsDTO)
                 .orElseThrow();
     }
 

@@ -66,7 +66,7 @@ public class QuestionResource {
     public ResponseEntity<QuestionDetailsDTO> getQuestionDetails(@PathVariable long questionId) {
         log.debug("REST get question by id: {}", questionId);
 
-        return new ResponseEntity<>(questionService.getQuestionDetails(questionId, getCurrentUserName()), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.getQuestionDetails(questionId), HttpStatus.OK);
     }
 
     @PostMapping("/addAction")

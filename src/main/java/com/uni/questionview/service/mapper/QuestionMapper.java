@@ -10,8 +10,11 @@ import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
 import com.uni.questionview.service.dto.TagDTO;
+import com.uni.questionview.service.exceptions.UserNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,9 +57,7 @@ public class QuestionMapper {
         }
     }
 
-    public QuestionDetailsDTO mapToQuestionDetailsDTO(QuestionEntity questionEntity, String currentUserName) {
-        User user = userRepository.findOneByLogin(currentUserName)
-                .orElseThrow(() -> new RuntimeException("User with userName: " + currentUserName +" not found"));
+    public QuestionDetailsDTO mapToQuestionDetailsDTO(QuestionEntity questionEntity) {
 
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
@@ -76,7 +77,7 @@ public class QuestionMapper {
                     questionEntity.calculateRating(),
                     tagDTOS,
                     actionDTOS,
-                    questionEntity.checkIfQuestionIsOnUserList(user.getId()));
+                    questionEntity.checkIfQuestionIsOnUserList(getLoggedUser().getId()));
         }
     }
 
@@ -92,7 +93,8 @@ public class QuestionMapper {
                     questionEntity.getDifficultyLevel(),
                     questionEntity.getTimeEstimate(),
                     questionEntity.calculateRating(),
-                    tagDTOS);
+                    tagDTOS,
+                    questionEntity.checkIfQuestionIsOnUserList(getLoggedUser().getId()));
         }
     }
 
@@ -118,5 +120,15 @@ public class QuestionMapper {
                 .tags(questionTags)
                 .actions(actionEntities)
                 .build();
+    }
+
+    private User getLoggedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null) {
+            return userRepository.findOneByLogin(authentication.getName())
+                    .orElseThrow(() -> new UserNotFoundException("User with userName: " + authentication.getName() +" not found"));
+        }
+        throw new RuntimeException("Authentication failed");
     }
 }

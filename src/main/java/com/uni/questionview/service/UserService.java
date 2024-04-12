@@ -9,14 +9,10 @@ import com.uni.questionview.security.AuthoritiesConstants;
 import com.uni.questionview.security.SecurityUtils;
 import com.uni.questionview.service.dto.AdminUserDTO;
 import com.uni.questionview.service.dto.UserDTO;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.uni.questionview.service.exceptions.EmailAlreadyUsedException;
 import com.uni.questionview.service.exceptions.InvalidPasswordException;
 import com.uni.questionview.service.exceptions.UsernameAlreadyUsedException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -26,6 +22,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import tech.jhipster.security.RandomUtil;
 
 /**

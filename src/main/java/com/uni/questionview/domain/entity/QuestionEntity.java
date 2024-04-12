@@ -51,10 +51,10 @@ public class QuestionEntity {
     @Column(name = "difficultylevel")
     private int difficultyLevel;
 
-    private Status status;
+    //private Status status;
 
-    @Column(name = "statuschangereason")
-    private String statusChaneReason;
+//    @Column(name = "statuschangereason")
+//    private String statusChaneReason;
 
     private String summary;
 

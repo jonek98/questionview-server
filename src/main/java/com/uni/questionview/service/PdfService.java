@@ -34,8 +34,11 @@ public class PdfService {
 
     public static File convertToFile(MultipartFile multipartFile) throws IOException {
         Path tempDir = Files.createTempDirectory("");
+
         File file = tempDir.resolve(Objects.requireNonNull(multipartFile.getOriginalFilename())).toFile();
+
         multipartFile.transferTo(file);
+
         return file;
     }
 }

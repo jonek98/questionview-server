@@ -1,10 +1,7 @@
 package com.uni.questionview.service;
 
 import com.uni.questionview.domain.User;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -15,6 +12,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import tech.jhipster.config.JHipsterProperties;
 
 /**

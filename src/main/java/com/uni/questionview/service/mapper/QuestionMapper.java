@@ -1,10 +1,8 @@
 package com.uni.questionview.service.mapper;
 
 import com.uni.questionview.domain.User;
-import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
-import com.uni.questionview.domain.entity.TagEntity;
-import com.uni.questionview.repository.UserRepository;
+import com.uni.questionview.service.UserService;
 import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.QuestionDetailsDTO;
@@ -13,8 +11,6 @@ import com.uni.questionview.service.dto.TagDTO;
 import com.uni.questionview.service.exceptions.UserNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,32 +18,24 @@ import java.util.List;
 @Service
 public class QuestionMapper {
 
-    private final ActionMapper actionMapper;
-
-    private final TagMapper tagMapper;
-
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public QuestionMapper(ActionMapper actionMapper, TagMapper tagMapper, UserRepository userRepository) {
-        this.actionMapper = actionMapper;
-        this.tagMapper = tagMapper;
-        this.userRepository = userRepository;
+    public QuestionMapper(UserService userService) {
+        this.userService = userService;
     }
 
     public QuestionDTO mapToQuestionDTO(QuestionEntity questionEntity) {
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
         else {
-            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
-            List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(actionMapper::mapToActionDTO).toList();
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
+            List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(ActionMapper::mapToActionDTO).toList();
             return QuestionDTO.of(
                     questionEntity.getId(),
                     questionEntity.getAnswerText(),
                     questionEntity.getQuestionText(),
                     questionEntity.getDifficultyLevel(),
-                    questionEntity.getStatus(),
-                    questionEntity.getStatusChaneReason(),
                     questionEntity.getSummary(),
                     questionEntity.getLanguage(),
                     questionEntity.getTimeEstimate(),
@@ -58,26 +46,23 @@ public class QuestionMapper {
     }
 
     public QuestionDetailsDTO mapToQuestionDetailsDTO(QuestionEntity questionEntity) {
-
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
         else {
-            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
-            List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(actionMapper::mapToActionDTO).toList();
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
+            List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(ActionMapper::mapToActionDTO).toList();
             return QuestionDetailsDTO.of(
                     questionEntity.getId(),
                     questionEntity.getAnswerText(),
                     questionEntity.getQuestionText(),
                     questionEntity.getDifficultyLevel(),
-                    questionEntity.getStatus(),
-                    questionEntity.getStatusChaneReason(),
                     questionEntity.getSummary(),
                     questionEntity.getLanguage(),
                     questionEntity.getTimeEstimate(),
                     questionEntity.calculateRating(),
                     tagDTOS,
                     actionDTOS,
-                    questionEntity.checkIfQuestionIsOnUserList(getLoggedUser().getId()));
+                    questionEntity.checkIfQuestionIsOnUserList(getCurrentLoggedUser().getId()));
         }
     }
 
@@ -85,7 +70,7 @@ public class QuestionMapper {
         if (questionEntity == null)
             throw new NullPointerException("QuestionEntity is null!");
         else {
-            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(tagMapper::mapToTagDTO).toList();
+            List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
             return SimplifiedQuestionDTO.of(
                     questionEntity.getId(),
                     questionEntity.getSummary(),
@@ -94,42 +79,12 @@ public class QuestionMapper {
                     questionEntity.getTimeEstimate(),
                     questionEntity.calculateRating(),
                     tagDTOS,
-                    questionEntity.checkIfQuestionIsOnUserList(getLoggedUser().getId()));
+                    questionEntity.checkIfQuestionIsOnUserList(getCurrentLoggedUser().getId()));
         }
     }
 
-    public QuestionEntity mapToQuestionEntity(QuestionDTO questionDTO) {
-        List<TagEntity> questionTags = questionDTO.getTags()
-                .stream()
-                .map(tagMapper::mapToTagEntity).toList();
-
-        List<ActionEntity> actionEntities = questionDTO.getActions()
-                .stream()
-                .map(actionMapper::mapToActionEntity)
-                .toList();
-
-        return QuestionEntity.builder()
-                .id(questionDTO.getId())
-                .answerText(questionDTO.getAnswerText())
-                .questionText(questionDTO.getQuestionText())
-                .difficultyLevel(questionDTO.getDifficultyLevel())
-                .status(questionDTO.getStatus())
-                .statusChaneReason(questionDTO.getStatusChaneReason())
-                .summary(questionDTO.getSummary())
-                .language(questionDTO.getLanguage())
-                .timeEstimate(questionDTO.getTimeEstimate())
-                .tags(questionTags)
-                .actions(actionEntities)
-                .build();
-    }
-
-    private User getLoggedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null) {
-            return userRepository.findOneByLogin(authentication.getName())
-                    .orElseThrow(() -> new UserNotFoundException("User with userName: " + authentication.getName() +" not found"));
-        }
-        throw new RuntimeException("Authentication failed");
+    private User getCurrentLoggedUser() {
+        return userService.getUserWithAuthorities()
+                .orElseThrow(() -> new UserNotFoundException("Current logged user not found!"));
     }
 }

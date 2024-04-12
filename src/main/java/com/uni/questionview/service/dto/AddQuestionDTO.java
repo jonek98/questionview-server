@@ -1,7 +1,6 @@
 package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.Language;
-import com.uni.questionview.domain.Status;
 
 import java.util.List;
 
@@ -12,9 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(staticName = "of")
-public class EditQuestionDTO {
+public class AddQuestionDTO {
 
-    private long id;
+    private Long id;
 
     private String answerText;
 

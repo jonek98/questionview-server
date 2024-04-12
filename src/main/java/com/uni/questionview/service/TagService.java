@@ -15,25 +15,25 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
-    private final TagMapper tagMapper;
-
     @Autowired
-    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+    public TagService(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
-        this.tagMapper = tagMapper;
     }
 
     public List<TagDTO> getAllTags() {
         return tagRepository.findAll()
                 .stream()
-                .map(tagMapper::mapToTagDTO)
+                .map(TagMapper::mapToTagDTO)
                 .toList();
     }
 
     public TagDTO createTag(TagDTO tagDTO) {
-        TagEntity savedTag = tagRepository.save(tagMapper.mapToTagEntity(tagDTO));
+        TagEntity tagToSave = TagEntity.builder()
+                .tagLabel(tagDTO.getTagLabel())
+                .build();
+        TagEntity savedTag = tagRepository.save(tagToSave);
 
-        return tagMapper.mapToTagDTO(savedTag);
+        return TagMapper.mapToTagDTO(savedTag);
     }
 
     public boolean removeTag(Long tagId) {

@@ -1,7 +1,6 @@
 package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.Language;
-import com.uni.questionview.domain.Status;
 
 import java.util.List;
 
@@ -19,10 +18,6 @@ public class QuestionDetailsDTO {
     private String questionText;
 
     private int difficultyLevel;
-
-    private Status status;
-
-    private String statusChaneReason;
 
     private String summary;
 

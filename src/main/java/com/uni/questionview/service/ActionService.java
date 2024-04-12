@@ -10,13 +10,13 @@ import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 import com.uni.questionview.service.exceptions.UserNotFoundException;
 import com.uni.questionview.service.mapper.ActionMapper;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 
 @Service
+@AllArgsConstructor
 public class ActionService {
 
     private final ActionRepository actionRepository;
@@ -25,20 +25,11 @@ public class ActionService {
 
     private final UserService userService;
 
-    @Autowired
-    public ActionService(ActionRepository actionRepository, QuestionRepository questionRepository,
-            UserService userService) {
-        this.actionRepository = actionRepository;
-        this.questionRepository = questionRepository;
-        this.userService = userService;
-    }
-
     public ActionDTO addAction(ActionDTO actionDTO) {
+        User currentLoggedUser = getCurrentLoggedUser();
+
         QuestionEntity question = questionRepository.findById(actionDTO.getQuestionId())
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found: " + actionDTO.getQuestionId()));
-
-        User currentLoggedUser = userService.getUserWithAuthorities()
-                .orElseThrow(() -> new UserNotFoundException("Current logged user not found"));
 
         ActionEntity actionToSave = ActionEntity.builder()
                 .actionType(actionDTO.getActionType())
@@ -52,8 +43,7 @@ public class ActionService {
     }
 
     public ActionEntity createAddQuestionAction(QuestionEntity question) {
-        User user = userService.getUserWithAuthorities()
-                .orElseThrow(() -> new UserNotFoundException("Current logged user not found!"));
+        User user = getCurrentLoggedUser();
 
         return ActionEntity.builder()
                 .actionType(ActionType.QUESTION_ADD)
@@ -64,4 +54,8 @@ public class ActionService {
                 .build();
     }
 
+    private User getCurrentLoggedUser() {
+        return userService.getUserWithAuthorities()
+            .orElseThrow(() -> new UserNotFoundException("Current logged user not found"));
+    }
 }

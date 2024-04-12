@@ -2,7 +2,6 @@ package com.uni.questionview.web.rest;
 
 import com.uni.questionview.security.AuthoritiesConstants;
 import com.uni.questionview.service.OpenAIService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

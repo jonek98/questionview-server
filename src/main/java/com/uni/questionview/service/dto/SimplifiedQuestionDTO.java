@@ -1,15 +1,17 @@
 package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.Language;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 @Data
 @AllArgsConstructor(staticName = "of")
+@NoArgsConstructor
 public class SimplifiedQuestionDTO {
+
     private long id;
     private String summary;
     private Language language;

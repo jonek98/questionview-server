@@ -1,20 +1,17 @@
 package com.uni.questionview.domain.entity;
 
+import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import com.uni.questionview.domain.ActionType;
-
 import java.sql.Timestamp;
-
-
-@Builder
-@Data
 @Entity
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "action")

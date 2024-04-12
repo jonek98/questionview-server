@@ -7,20 +7,20 @@ import com.uni.questionview.service.MailService;
 import com.uni.questionview.service.UserService;
 import com.uni.questionview.service.dto.AdminUserDTO;
 import com.uni.questionview.service.dto.PasswordChangeDTO;
-import com.uni.questionview.web.rest.errors.*;
+import com.uni.questionview.web.rest.errors.EmailAlreadyUsedException;
+import com.uni.questionview.web.rest.errors.InvalidPasswordException;
+import com.uni.questionview.web.rest.errors.LoginAlreadyUsedException;
 import com.uni.questionview.web.rest.vm.KeyAndPasswordVM;
 import com.uni.questionview.web.rest.vm.ManagedUserVM;
 import jakarta.validation.Valid;
-import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for managing the current user's account.
- */
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api")
 public class AccountResource {

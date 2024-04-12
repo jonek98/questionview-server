@@ -1,15 +1,9 @@
 package com.uni.questionview.web.rest;
 
-import static com.uni.questionview.security.SecurityUtils.AUTHORITIES_KEY;
-import static com.uni.questionview.security.SecurityUtils.JWT_ALGORITHM;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.uni.questionview.web.rest.vm.LoginVM;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +21,13 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller to authenticate users.
- */
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
+
+import static com.uni.questionview.security.SecurityUtils.AUTHORITIES_KEY;
+import static com.uni.questionview.security.SecurityUtils.JWT_ALGORITHM;
+
 @RestController
 @RequestMapping("/api")
 public class AuthenticateController {
@@ -66,12 +64,6 @@ public class AuthenticateController {
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 
-    /**
-     * {@code GET /authenticate} : check if the user is authenticated, and return its login.
-     *
-     * @param request the HTTP request.
-     * @return the login if the user is authenticated.
-     */
     @GetMapping("/authenticate")
     public String isAuthenticated(HttpServletRequest request) {
         log.debug("REST request to check if the current user is authenticated");
@@ -101,9 +93,6 @@ public class AuthenticateController {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    /**
-     * Object to return as body in JWT Authentication.
-     */
     static class JWTToken {
 
         private String idToken;

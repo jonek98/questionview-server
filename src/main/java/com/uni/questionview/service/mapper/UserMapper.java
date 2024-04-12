@@ -4,19 +4,14 @@ import com.uni.questionview.domain.Authority;
 import com.uni.questionview.domain.User;
 import com.uni.questionview.service.dto.AdminUserDTO;
 import com.uni.questionview.service.dto.UserDTO;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Service;
 
-/**
- * Mapper for the entity {@link User} and its DTO called {@link UserDTO}.
- *
- * Normal mappers are generated using MapStruct, this one is hand-coded as MapStruct
- * support is still in beta, and requires a manual step with an IDE.
- */
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
 public class UserMapper {
 
@@ -25,7 +20,10 @@ public class UserMapper {
     }
 
     public static UserDTO userToUserDTO(User user) {
-        return new UserDTO(user);
+        return UserDTO.of(
+            user.getId(),
+            user.getLogin()
+        );
     }
 
     public List<AdminUserDTO> usersToAdminUserDTOs(List<User> users) {

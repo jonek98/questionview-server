@@ -5,10 +5,13 @@ import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.domain.entity.RatingEntity;
+import com.uni.questionview.domain.entity.TagEntity;
 import com.uni.questionview.repository.ActionRepository;
 import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.repository.RatingRepository;
+import com.uni.questionview.repository.TagRepository;
 import com.uni.questionview.repository.UserRepository;
+import com.uni.questionview.service.dto.EditQuestionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.RatingDTO;
@@ -28,6 +31,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Vector;
 
 @Service
 public class QuestionService {
@@ -44,15 +48,19 @@ public class QuestionService {
 
     private final RatingMapper ratingMapper;
 
+    private final TagRepository tagRepository;
+
     @Autowired
     public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper,
-                           UserRepository userRepository, ActionRepository actionRepository, RatingRepository ratingRepository, RatingMapper ratingMapper) {
+                           UserRepository userRepository, ActionRepository actionRepository, RatingRepository ratingRepository, RatingMapper ratingMapper,
+            TagRepository tagRepository) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.userRepository = userRepository;
         this.actionRepository = actionRepository;
         this.ratingRepository = ratingRepository;
         this.ratingMapper = ratingMapper;
+        this.tagRepository = tagRepository;
     }
 
     public List<SimplifiedQuestionDTO> getAllQuestions() {
@@ -83,6 +91,31 @@ public class QuestionService {
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found after saving: " + savedQuestion.getId()));
 
         return questionMapper.mapToQuestionDTO(updatedQuestion);
+    }
+
+    public QuestionDTO editQuestion(EditQuestionDTO editQuestionDTO) {
+        QuestionEntity questionFromDb = questionRepository.findById(editQuestionDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Question with id: "+ editQuestionDTO.getId() + " not found"));
+
+        List<TagEntity> tags = tagRepository.findAllById(editQuestionDTO.getTagIds());
+
+        QuestionEntity questionEntity = QuestionEntity.builder()
+                .id(editQuestionDTO.getId())
+                .answerText(editQuestionDTO.getAnswerText())
+                .questionText(editQuestionDTO.getQuestionText())
+                .difficultyLevel(editQuestionDTO.getDifficultyLevel())
+                .summary(editQuestionDTO.getSummary())
+                .language(editQuestionDTO.getLanguage())
+                .timeEstimate(editQuestionDTO.getTimeEstimate())
+                .tags(tags)
+                .status(questionFromDb.getStatus())
+                .statusChaneReason(questionFromDb.getStatusChaneReason())
+                .ratings(questionFromDb.getRatings())
+                .actions(questionFromDb.getActions())
+                .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
+                .build();
+
+        return questionMapper.mapToQuestionDTO(questionRepository.save(questionEntity));
     }
 
     public QuestionDTO getQuestion(Long questionId) {

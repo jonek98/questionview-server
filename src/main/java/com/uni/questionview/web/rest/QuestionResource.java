@@ -4,6 +4,7 @@ import com.uni.questionview.security.AuthoritiesConstants;
 import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
 import com.uni.questionview.service.dto.ActionDTO;
+import com.uni.questionview.service.dto.EditQuestionDTO;
 import com.uni.questionview.service.dto.QuestionDTO;
 import com.uni.questionview.service.dto.QuestionDetailsDTO;
 import com.uni.questionview.service.dto.RatingDTO;
@@ -51,6 +52,14 @@ public class QuestionResource {
         log.debug("REST post to add new Questions");
 
         return new ResponseEntity<>(questionService.addQuestion(questionDTO, getCurrentUserName()), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/editQuestion")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDTO> editQuestion(@RequestBody EditQuestionDTO editQuestionDTO) {
+        log.debug("REST post to edit Question");
+
+        return new ResponseEntity<>(questionService.editQuestion(editQuestionDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/getQuestion/{questionId}")

@@ -109,6 +109,7 @@ public class QuestionMapper {
                 .toList();
 
         return QuestionEntity.builder()
+                .id(questionDTO.getId())
                 .answerText(questionDTO.getAnswerText())
                 .questionText(questionDTO.getQuestionText())
                 .difficultyLevel(questionDTO.getDifficultyLevel())

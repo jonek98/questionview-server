@@ -3,21 +3,13 @@ package com.uni.questionview.web.rest;
 import com.uni.questionview.security.AuthoritiesConstants;
 import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
-import com.uni.questionview.service.dto.ActionDTO;
-import com.uni.questionview.service.dto.EditQuestionDTO;
-import com.uni.questionview.service.dto.QuestionDTO;
-import com.uni.questionview.service.dto.QuestionDetailsDTO;
-import com.uni.questionview.service.dto.RatingDTO;
-import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
-
+import com.uni.questionview.service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,18 +40,18 @@ public class QuestionResource {
 
     @PostMapping("/addQuestion")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<QuestionDTO> addQuestion(@RequestBody QuestionDTO questionDTO) {
+    public ResponseEntity<QuestionDTO> addQuestion(@RequestBody AddQuestionDTO addQuestionDTO) {
         log.debug("REST post to add new Questions");
 
-        return new ResponseEntity<>(questionService.addQuestion(questionDTO, getCurrentUserName()), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.addQuestion(addQuestionDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/editQuestion")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<QuestionDTO> editQuestion(@RequestBody EditQuestionDTO editQuestionDTO) {
+    public ResponseEntity<QuestionDTO> editQuestion(@RequestBody AddQuestionDTO addQuestionDTO) {
         log.debug("REST post to edit Question");
 
-        return new ResponseEntity<>(questionService.editQuestion(editQuestionDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.editQuestion(addQuestionDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/getQuestion/{questionId}")
@@ -89,42 +81,31 @@ public class QuestionResource {
     @PostMapping("/addRating")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<RatingDTO> addRating(@RequestBody RatingDTO ratingDTO) {
-        log.debug("REST add rating to question with id: {}", ratingDTO.getQuestionId());
+        log.debug("REST post rating to question with id: {}", ratingDTO.getQuestionId());
 
-        return new ResponseEntity<>(questionService.addRating(ratingDTO.withUserName(getCurrentUserName())), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.addRating(ratingDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/userQuestionList")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<SimplifiedQuestionDTO>> getQuestionsFromUserList() {
-        String currentUserName = getCurrentUserName();
-        log.debug("REST get user {} question list", currentUserName);
+        log.debug("REST get current logged user question list");
 
-        return new ResponseEntity<>(questionService.getQuestionsFromUserList(currentUserName), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.getQuestionsFromUserList(), HttpStatus.OK);
     }
 
     @PostMapping("/addQuestionToUserList")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<SimplifiedQuestionDTO>> addQuestionToUserList(@RequestParam long questionId) {
-        String currentUserName = getCurrentUserName();
-        log.debug("REST get user {} question list", currentUserName);
+        log.debug("Add questions to current logged user list");
 
-        return new ResponseEntity<>(questionService.addQuestionToUserList(currentUserName, questionId), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.addQuestionToUserList(questionId), HttpStatus.OK);
     }
 
     @DeleteMapping("/removeQuestionFromUserList")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<List<SimplifiedQuestionDTO>> removeQuestionFromUserList(@RequestParam long questionId) {
         log.debug("REST delete question with id {} from user list", questionId);
-        String currentUserName = getCurrentUserName();
-        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId, currentUserName), HttpStatus.OK);
-    }
-
-    private String getCurrentUserName() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName();
-        }
-        throw new RuntimeException("User not found");
+        return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId), HttpStatus.OK);
     }
 }

@@ -4,36 +4,32 @@ import com.uni.questionview.domain.entity.TagEntity;
 import com.uni.questionview.repository.TagRepository;
 import com.uni.questionview.service.dto.TagDTO;
 import com.uni.questionview.service.mapper.TagMapper;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class TagService {
 
     private final TagRepository tagRepository;
 
-    private final TagMapper tagMapper;
-
-    @Autowired
-    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
-        this.tagRepository = tagRepository;
-        this.tagMapper = tagMapper;
-    }
-
     public List<TagDTO> getAllTags() {
         return tagRepository.findAll()
                 .stream()
-                .map(tagMapper::mapToTagDTO)
+                .map(TagMapper::mapToTagDTO)
                 .toList();
     }
 
     public TagDTO createTag(TagDTO tagDTO) {
-        TagEntity savedTag = tagRepository.save(tagMapper.mapToTagEntity(tagDTO));
+        TagEntity tagToSave = TagEntity.builder()
+                .tagLabel(tagDTO.getTagLabel())
+                .build();
 
-        return tagMapper.mapToTagDTO(savedTag);
+        TagEntity savedTag = tagRepository.save(tagToSave);
+
+        return TagMapper.mapToTagDTO(savedTag);
     }
 
     public boolean removeTag(Long tagId) {

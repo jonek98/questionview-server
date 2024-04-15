@@ -1,5 +1,6 @@
 package com.uni.questionview.service;
 
+import lombok.NoArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,9 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 @Service
+@NoArgsConstructor
 public class PdfService {
+
     public String readPdf(MultipartFile file) {
         String text = "";
 
@@ -34,8 +37,11 @@ public class PdfService {
 
     public static File convertToFile(MultipartFile multipartFile) throws IOException {
         Path tempDir = Files.createTempDirectory("");
+
         File file = tempDir.resolve(Objects.requireNonNull(multipartFile.getOriginalFilename())).toFile();
+
         multipartFile.transferTo(file);
+
         return file;
     }
 }

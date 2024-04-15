@@ -1,13 +1,10 @@
 package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.ActionType;
-
-import java.sql.Timestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.With;
 
+import java.sql.Timestamp;
 @Data
 @AllArgsConstructor(staticName = "of")
 public class ActionDTO {
@@ -16,6 +13,5 @@ public class ActionDTO {
     private String comment;
     private Timestamp date;
     private long questionId;
-    @With
     private UserDTO user;
 }

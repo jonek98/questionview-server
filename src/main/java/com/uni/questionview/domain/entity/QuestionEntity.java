@@ -2,36 +2,21 @@ package com.uni.questionview.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uni.questionview.domain.Language;
-import com.uni.questionview.domain.Status;
+import com.uni.questionview.domain.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.uni.questionview.domain.User;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-
+@Entity
 @Getter
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "question")
@@ -51,18 +36,14 @@ public class QuestionEntity {
     @Column(name = "difficultylevel")
     private int difficultyLevel;
 
-    private Status status;
+//    private Status status;
 
-    @Column(name = "statuschangereason")
-    private String statusChaneReason;
+//    @Column(name = "statuschangereason")
+//    private String statusChaneReason;
 
     private String summary;
 
     private Language language;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
-    private List<RatingEntity> ratings;
 
     @Column(name = "timeestimate")
     private int timeEstimate;
@@ -74,6 +55,10 @@ public class QuestionEntity {
 
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     private List<ActionEntity> actions;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    private List<RatingEntity> ratings;
 
     @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)

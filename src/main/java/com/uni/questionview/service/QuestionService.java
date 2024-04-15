@@ -1,6 +1,5 @@
 package com.uni.questionview.service;
 
-import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
@@ -10,58 +9,36 @@ import com.uni.questionview.repository.ActionRepository;
 import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.repository.RatingRepository;
 import com.uni.questionview.repository.TagRepository;
-import com.uni.questionview.repository.UserRepository;
-import com.uni.questionview.service.dto.EditQuestionDTO;
-import com.uni.questionview.service.dto.QuestionDTO;
-import com.uni.questionview.service.dto.QuestionDetailsDTO;
-import com.uni.questionview.service.dto.RatingDTO;
-import com.uni.questionview.service.dto.SimplifiedQuestionDTO;
+import com.uni.questionview.service.dto.*;
 import com.uni.questionview.service.exceptions.QuestionAlreadyOnUserList;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 import com.uni.questionview.service.exceptions.UserAlreadyRatedQuestionException;
-import com.uni.questionview.service.exceptions.UserNotFoundException;
 import com.uni.questionview.service.mapper.QuestionMapper;
-
 import com.uni.questionview.service.mapper.RatingMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 
 @Service
+@AllArgsConstructor
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
     private final QuestionMapper questionMapper;
 
-    private final UserRepository userRepository;
-
     private final ActionRepository actionRepository;
 
     private final RatingRepository ratingRepository;
 
-    private final RatingMapper ratingMapper;
-
     private final TagRepository tagRepository;
 
-    @Autowired
-    public QuestionService(QuestionRepository questionRepository, QuestionMapper questionMapper,
-                           UserRepository userRepository, ActionRepository actionRepository, RatingRepository ratingRepository, RatingMapper ratingMapper,
-            TagRepository tagRepository) {
-        this.questionRepository = questionRepository;
-        this.questionMapper = questionMapper;
-        this.userRepository = userRepository;
-        this.actionRepository = actionRepository;
-        this.ratingRepository = ratingRepository;
-        this.ratingMapper = ratingMapper;
-        this.tagRepository = tagRepository;
-    }
+    private final UserService userService;
+
+    private final ActionService actionService;
 
     public List<SimplifiedQuestionDTO> getAllQuestions() {
         return questionRepository.findAll()
@@ -71,118 +48,99 @@ public class QuestionService {
     }
 
     @Transactional
-    public QuestionDTO addQuestion(QuestionDTO questionDTO, String userName) {
-        User user = userRepository.findOneByLogin(userName)
-                .orElseThrow(() -> new UserNotFoundException("User not found with login: " + userName));
+    public QuestionDTO addQuestion(AddQuestionDTO addQuestionDTO) {
+        QuestionEntity questionToSave = createQuestion(addQuestionDTO);
 
-        QuestionEntity questionEntityToSave = questionMapper.mapToQuestionEntity(questionDTO);
-        QuestionEntity savedQuestion = questionRepository.save(questionEntityToSave);
+        QuestionEntity savedQuestion = questionRepository.save(questionToSave);
 
-        ActionEntity actionEntity = ActionEntity.builder()
-                .question(savedQuestion)
-                .user(user)
-                .actionType(ActionType.QUESTION_ADD)
-                .comment("User " + userName + " has created a question")
-                .date(Timestamp.valueOf(LocalDate.now().atTime(LocalTime.now())))
-                .build();
-        actionRepository.save(actionEntity);
+        ActionEntity actionToSave = actionService.createAddQuestionAction(savedQuestion);
 
-        QuestionEntity updatedQuestion = questionRepository.findById(savedQuestion.getId())
-                .orElseThrow(() -> new QuestionNotFoundException("Question not found after saving: " + savedQuestion.getId()));
+        actionRepository.save(actionToSave);
 
-        return questionMapper.mapToQuestionDTO(updatedQuestion);
+        return questionMapper.mapToQuestionDTO(savedQuestion);
     }
 
-    public QuestionDTO editQuestion(EditQuestionDTO editQuestionDTO) {
-        QuestionEntity questionFromDb = questionRepository.findById(editQuestionDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Question with id: "+ editQuestionDTO.getId() + " not found"));
+    public QuestionDTO editQuestion(AddQuestionDTO addQuestionDTO) {
+        QuestionEntity editedQuestion = this.createEditedQuestion(addQuestionDTO);
 
-        List<TagEntity> tags = tagRepository.findAllById(editQuestionDTO.getTagIds());
+        QuestionEntity updatedQuestion = questionRepository.save(editedQuestion);
 
-        QuestionEntity questionEntity = QuestionEntity.builder()
-                .id(editQuestionDTO.getId())
-                .answerText(editQuestionDTO.getAnswerText())
-                .questionText(editQuestionDTO.getQuestionText())
-                .difficultyLevel(editQuestionDTO.getDifficultyLevel())
-                .summary(editQuestionDTO.getSummary())
-                .language(editQuestionDTO.getLanguage())
-                .timeEstimate(editQuestionDTO.getTimeEstimate())
-                .tags(tags)
-                .status(questionFromDb.getStatus())
-                .statusChaneReason(questionFromDb.getStatusChaneReason())
-                .ratings(questionFromDb.getRatings())
-                .actions(questionFromDb.getActions())
-                .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
-                .build();
-
-        return questionMapper.mapToQuestionDTO(questionRepository.save(questionEntity));
+        return questionMapper
+                .mapToQuestionDTO(updatedQuestion);
     }
 
     public QuestionDTO getQuestion(Long questionId) {
         return questionRepository.findById(questionId)
                 .map(questionMapper::mapToQuestionDTO)
-                .orElseThrow();
+                .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ questionId+ "not found."));
     }
 
     public QuestionDetailsDTO getQuestionDetails(Long questionId) {
         return questionRepository.findById(questionId)
                 .map(questionMapper::mapToQuestionDetailsDTO)
-                .orElseThrow();
+                .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ questionId+ "not found."));
     }
 
     public RatingDTO addRating(RatingDTO ratingDTO) {
-        RatingEntity ratingEntityToSave = ratingMapper.mapToEntity(ratingDTO);
+        QuestionEntity questionEntity = questionRepository.findById(ratingDTO.getQuestionId())
+                .orElseThrow(() -> new QuestionNotFoundException("Question with id not found: " + ratingDTO.getQuestionId()));
 
-        if(userAlreadyRatedQuestion(ratingEntityToSave))
+        RatingEntity ratingEntityToSave = RatingEntity.builder()
+                .rating(ratingDTO.getRating())
+                .question(questionEntity)
+                .user(getCurrentLoggedUser())
+                .build();
+
+        if (userAlreadyRatedQuestion(ratingEntityToSave))
             throw new UserAlreadyRatedQuestionException("User " + ratingEntityToSave.getUser().getLogin()
                 + " has already rated the question with id: " + ratingEntityToSave.getQuestion().getId());
 
-        return ratingMapper.mapToDto(ratingRepository.save(ratingEntityToSave));
+        return RatingMapper.mapToDto(ratingRepository.save(ratingEntityToSave));
     }
 
-    public List<SimplifiedQuestionDTO> getQuestionsFromUserList(String userName) {
-        User user = userRepository.findOneByLogin(userName)
-            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
-
+    public List<SimplifiedQuestionDTO> getQuestionsFromUserList() {
         return questionRepository.findAll()
             .stream()
-            .filter(question -> question.checkIfQuestionIsOnUserList(user.getId()))
+            .filter(question -> question.checkIfQuestionIsOnUserList(getCurrentLoggedUser().getId()))
             .map(questionMapper::mapToSimplifiedQuestionDTO)
             .toList();
     }
 
-    public List<SimplifiedQuestionDTO> addQuestionToUserList(String userName, long questionId) {
-        User user = userRepository.findOneByLogin(userName)
-            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
+    public List<SimplifiedQuestionDTO> addQuestionToUserList(long questionId) {
+        User currentLoggedUser = getCurrentLoggedUser();
+
         QuestionEntity questionEntity = questionRepository.findById(questionId)
             .orElseThrow(() -> new RuntimeException("Question with id: "+ questionId + " not found"));
 
-        if (questionEntity.getUsersWithQuestionOnList().contains(user)) {
-            throw new QuestionAlreadyOnUserList( "User '" + user.getLogin() + "' has already on list the question with ID: " + questionId);
+        if (questionEntity.getUsersWithQuestionOnList().contains(currentLoggedUser)) {
+            throw new QuestionAlreadyOnUserList("User '" + currentLoggedUser.getLogin()
+                    +"' has already on list the question with ID: " + questionId);
         }
 
-        questionEntity.getUsersWithQuestionOnList().add(user);
+        questionEntity.getUsersWithQuestionOnList().add(currentLoggedUser);
 
         questionRepository.save(questionEntity);
 
-        return getQuestionsFromUserList(user.getLogin());
+        return getQuestionsFromUserList();
     }
 
-    public List<SimplifiedQuestionDTO> removeQuestionFromUserList(long questionId, String userName) {
-        User user = userRepository.findOneByLogin(userName)
-            .orElseThrow(() -> new RuntimeException("User with userName: " + userName +" not found"));
+    public List<SimplifiedQuestionDTO> removeQuestionFromUserList(long questionId) {
+        User currentLoggedUseruser = getCurrentLoggedUser();
+
         QuestionEntity questionEntity = questionRepository.findById(questionId)
             .orElseThrow(() -> new RuntimeException("Question with id: "+ questionId + " not found"));
 
-        if (!questionEntity.getUsersWithQuestionOnList().contains(user)) {
-            throw new IllegalArgumentException( "User '" + user.getLogin() + "' has not question with ID: " + questionId + " on their list");
+        if (!questionEntity.getUsersWithQuestionOnList().contains(currentLoggedUseruser)) {
+            throw new IllegalArgumentException( "User '" + currentLoggedUseruser.getLogin()
+                    + "' has not question with ID: " + questionId + " on their list");
+
         }
 
-        questionEntity.getUsersWithQuestionOnList().remove(user);
+        questionEntity.getUsersWithQuestionOnList().remove(currentLoggedUseruser);
 
         questionRepository.save(questionEntity);
 
-        return getQuestionsFromUserList(user.getLogin());
+        return getQuestionsFromUserList();
     }
 
     public boolean removeQuestion(long questionId) {
@@ -194,5 +152,45 @@ public class QuestionService {
     private boolean userAlreadyRatedQuestion(RatingEntity ratingEntity) {
         return ratingRepository
             .existsByUserIdAndQuestionId(ratingEntity.getUser().getId(), ratingEntity.getQuestion().getId());
+    }
+
+    private QuestionEntity createQuestion(AddQuestionDTO addQuestionDTO) {
+        List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
+
+        return  QuestionEntity.builder()
+                .questionText(addQuestionDTO.getAnswerText())
+                .answerText(addQuestionDTO.getAnswerText())
+                .difficultyLevel(addQuestionDTO.getDifficultyLevel())
+                .summary(addQuestionDTO.getSummary())
+                .language(addQuestionDTO.getLanguage())
+                .tags(tags)
+                .actions(Collections.emptyList())
+                .build();
+    }
+
+    private QuestionEntity createEditedQuestion(AddQuestionDTO addQuestionDTO) {
+        List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
+
+        QuestionEntity questionFromDb = questionRepository.findById(addQuestionDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Question with id: "+ addQuestionDTO.getId() + " not found"));
+
+        return QuestionEntity.builder()
+                .id(addQuestionDTO.getId())
+                .answerText(addQuestionDTO.getAnswerText())
+                .questionText(addQuestionDTO.getQuestionText())
+                .difficultyLevel(addQuestionDTO.getDifficultyLevel())
+                .summary(addQuestionDTO.getSummary())
+                .language(addQuestionDTO.getLanguage())
+                .timeEstimate(addQuestionDTO.getTimeEstimate())
+                .tags(tags)
+                .ratings(questionFromDb.getRatings())
+                .actions(questionFromDb.getActions())
+                .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
+                .build();
+    }
+
+    private User getCurrentLoggedUser() {
+        return userService.getUserWithAuthorities()
+                .orElseThrow(() -> new RuntimeException("Current logged user not found"));
     }
 }

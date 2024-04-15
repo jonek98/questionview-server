@@ -1,5 +1,7 @@
 package com.uni.questionview.service;
 
+import com.uni.questionview.domain.ActionType;
+import com.uni.questionview.domain.Status;
 import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
@@ -11,7 +13,11 @@ import com.uni.questionview.repository.RatingRepository;
 import com.uni.questionview.repository.TagRepository;
 import com.uni.questionview.service.dto.*;
 import com.uni.questionview.service.exceptions.QuestionAlreadyOnUserList;
+import com.uni.questionview.service.exceptions.QuestionCreatorNotFound;
+import com.uni.questionview.service.exceptions.QuestionNotAcceptedException;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
+import com.uni.questionview.service.exceptions.QuestionAlreadySubmittedException;
+import com.uni.questionview.service.exceptions.QuestionRejectedException;
 import com.uni.questionview.service.exceptions.UserAlreadyRatedQuestionException;
 import com.uni.questionview.service.mapper.QuestionMapper;
 import com.uni.questionview.service.mapper.RatingMapper;
@@ -41,11 +47,49 @@ public class QuestionService {
 
     private final ActionService actionService;
 
-    public List<SimplifiedQuestionDTO> getAllQuestions() {
+    private final VotingService votingService;
+
+    public List<SimplifiedQuestionDTO> getSubmittedQuestions() {
         return questionRepository.findAll()
                 .stream()
+                .filter(question -> question.getStatus() == Status.ACCEPTED)
                 .map(questionMapper::mapToSimplifiedQuestionDTO)
                 .toList();
+    }
+
+    public List<SimplifiedQuestionDTO> getPendingQuestions() {
+        return questionRepository.findAll()
+                .stream()
+                .filter(question -> question.getStatus() == Status.PENDING)
+                .map(questionMapper::mapToSimplifiedQuestionDTO)
+                .toList();
+    }
+
+    public List<SimplifiedQuestionDTO> getUserRejectedQuestions() {
+        return questionRepository.findAll()
+                .stream()
+                .filter(question -> question.getStatus() == Status.REJECTED)
+                .filter(this::isQuestionCreatedByCurrentLoggedUser)
+                .map(questionMapper::mapToSimplifiedQuestionDTO)
+                .toList();
+    }
+
+    public List<SimplifiedQuestionDTO> getUserQuestionsToCorrection() {
+        return questionRepository.findAll()
+                .stream()
+                .filter(question -> question.getStatus() == Status.NEEDS_CORRECTIONS)
+                .filter(this::isQuestionCreatedByCurrentLoggedUser)
+                .map(questionMapper::mapToSimplifiedQuestionDTO)
+                .toList();
+    }
+
+    public QuestionDTO correctQuestion(AddQuestionDTO addQuestionDTO, String correctionComment) {
+        QuestionEntity correctedQuestion = this.createCorrectedQuestion(addQuestionDTO, correctionComment);
+
+        QuestionEntity updatedQuestion = questionRepository.save(correctedQuestion);
+
+        return questionMapper
+                .mapToQuestionDTO(updatedQuestion);
     }
 
     @Transactional
@@ -76,10 +120,28 @@ public class QuestionService {
                 .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ questionId+ "not found."));
     }
 
-    public QuestionDetailsDTO getQuestionDetails(Long questionId) {
+    public QuestionDetailsDTO getSubmittedQuestionDetails(Long questionId) {
         return questionRepository.findById(questionId)
+                .filter(question -> question.getStatus() == Status.ACCEPTED)
                 .map(questionMapper::mapToQuestionDetailsDTO)
-                .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ questionId+ "not found."));
+                .orElseThrow(() -> new QuestionNotAcceptedException("Question with id: " + questionId +
+                        " is not accepted or does not exist."));
+    }
+
+    public QuestionDetailsDTO getPendingQuestionDetails(Long questionId) {
+        return questionRepository.findById(questionId)
+                .filter(question -> question.getStatus() == Status.PENDING)
+                .map(questionMapper::mapToQuestionDetailsDTO)
+                .orElseThrow(() -> new QuestionAlreadySubmittedException("Question with id: " + questionId +
+                        " is already submitted or does not exist."));
+    }
+
+    public QuestionDetailsDTO getRejectedQuestionDetails(Long questionId) {
+        return questionRepository.findById(questionId)
+                .filter(question -> question.getStatus() == Status.REJECTED)
+                .map(questionMapper::mapToQuestionDetailsDTO)
+                .orElseThrow(() -> new QuestionRejectedException("Question with id: " + questionId +
+                        " has been rejected or does not exist."));
     }
 
     public RatingDTO addRating(RatingDTO ratingDTO) {
@@ -144,6 +206,10 @@ public class QuestionService {
         return getQuestionsFromUserList();
     }
 
+    public int voteForQuestion(ActionDTO actionDTO) {
+        return votingService.voteForQuestion(actionDTO);
+    }
+
     public boolean removeQuestion(long questionId) {
         questionRepository.deleteById(questionId);
 
@@ -166,6 +232,7 @@ public class QuestionService {
                 .language(addQuestionDTO.getLanguage())
                 .tags(tags)
                 .actions(Collections.emptyList())
+                .status(Status.PENDING)
                 .build();
     }
 
@@ -180,6 +247,8 @@ public class QuestionService {
         List<ActionEntity> questionActions = Stream.concat(questionFromDb.getActions().stream(), Stream.of(editQuestionAction))
                 .toList();
 
+        questionFromDb.getRatings().clear();
+
         return QuestionEntity.builder()
                 .id(addQuestionDTO.getId())
                 .answerText(addQuestionDTO.getAnswerText())
@@ -192,7 +261,51 @@ public class QuestionService {
                 .ratings(questionFromDb.getRatings())
                 .actions(questionActions)
                 .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
+                .status(Status.PENDING)
                 .build();
+    }
+
+    private QuestionEntity createCorrectedQuestion(AddQuestionDTO addQuestionDTO, String correctionComment) {
+        List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
+
+        QuestionEntity questionFromDb = questionRepository.findById(addQuestionDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Question with id: "+ addQuestionDTO.getId() + " not found"));
+
+        ActionEntity correctionQuestionAction = actionRepository.save(actionService.createCorrectionQuestionAction(questionFromDb, correctionComment));
+
+        List<ActionEntity> questionActions = Stream.concat(questionFromDb.getActions().stream(), Stream.of(correctionQuestionAction))
+                .toList();
+
+        questionFromDb.getRatings().clear();
+
+
+        return QuestionEntity.builder()
+                .id(addQuestionDTO.getId())
+                .answerText(addQuestionDTO.getAnswerText())
+                .questionText(addQuestionDTO.getQuestionText())
+                .difficultyLevel(addQuestionDTO.getDifficultyLevel())
+                .summary(addQuestionDTO.getSummary())
+                .language(addQuestionDTO.getLanguage())
+                .timeEstimate(addQuestionDTO.getTimeEstimate())
+                .tags(tags)
+                .ratings(questionFromDb.getRatings())
+                .actions(questionActions)
+                .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
+                .status(Status.PENDING)
+                .build();
+    }
+
+    private boolean isQuestionCreatedByCurrentLoggedUser(QuestionEntity question) {
+        Long questionCreatorUserId = question
+                .getActions()
+                .stream()
+                .filter(action -> action.getActionType() == ActionType.QUESTION_ADD)
+                .map(ActionEntity::getUser)
+                .map(User::getId)
+                .findFirst()
+                .orElseThrow(() -> new QuestionCreatorNotFound("Creator of question: "+ question.getId()+ " not found!"));
+
+        return questionCreatorUserId.equals(getCurrentLoggedUser().getId());
     }
 
     private User getCurrentLoggedUser() {

@@ -33,12 +33,15 @@ public class QuestionMapper {
             questionEntity.getTimeEstimate(),
             questionEntity.calculateRating(),
             tagDTOS,
-            actionDTOS);
+            actionDTOS,
+            questionEntity.getStatus());
     }
 
     public QuestionDetailsDTO mapToQuestionDetailsDTO(QuestionEntity questionEntity) {
         List<TagDTO> tagDTOS = questionEntity.getTags().stream().map(TagMapper::mapToTagDTO).toList();
         List<ActionDTO> actionDTOS = questionEntity.getActions().stream().map(ActionMapper::mapToActionDTO).toList();
+        VoteStatus voteStatus = VoteStatus.of(questionEntity.countNumberOfAcceptVotes(), questionEntity.countNumberOfRejectVotes(),
+                questionEntity.countNumberOfNeedCorrectionsVotes());
 
         return QuestionDetailsDTO.of(
             questionEntity.getId(),
@@ -51,7 +54,9 @@ public class QuestionMapper {
             questionEntity.calculateRating(),
             tagDTOS,
             actionDTOS,
-            questionEntity.checkIfQuestionIsOnUserList(getCurrentLoggedUser().getId()));
+            questionEntity.checkIfQuestionIsOnUserList(getCurrentLoggedUser().getId()),
+            questionEntity.getStatus(),
+            voteStatus);
     }
 
     public SimplifiedQuestionDTO mapToSimplifiedQuestionDTO(QuestionEntity questionEntity) {

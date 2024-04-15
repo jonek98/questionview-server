@@ -1,6 +1,8 @@
 package com.uni.questionview.service.dto;
 
 import com.uni.questionview.domain.Language;
+import com.uni.questionview.domain.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +24,6 @@ public class QuestionDTO {
     private double rating;
     private List<TagDTO> tags;
     private List<ActionDTO> actions;
+    private Status status;
 
 }

@@ -1,13 +1,16 @@
 package com.uni.questionview.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.Language;
+import com.uni.questionview.domain.Status;
 import com.uni.questionview.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,10 +39,11 @@ public class QuestionEntity {
     @Column(name = "difficultylevel")
     private int difficultyLevel;
 
-//    private Status status;
+    @JsonIgnore
+    @With
+    @Column(name = "status")
+    private Status status;
 
-//    @Column(name = "statuschangereason")
-//    private String statusChaneReason;
 
     private String summary;
 
@@ -57,7 +61,7 @@ public class QuestionEntity {
     private List<ActionEntity> actions;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RatingEntity> ratings;
 
     @JsonIgnore
@@ -85,5 +89,23 @@ public class QuestionEntity {
             .map(User::getId)
             .toList()
             .contains(userId);
+    }
+
+    public int countNumberOfAcceptVotes() {
+        return (int) actions.stream()
+                .filter(action -> action.getActionType() == ActionType.QUESTION_ACCEPT)
+                .count();
+    }
+
+    public int countNumberOfRejectVotes() {
+        return (int) actions.stream()
+                .filter(action -> action.getActionType() == ActionType.QUESTION_REJECT)
+                .count();
+    }
+
+    public int countNumberOfNeedCorrectionsVotes() {
+        return (int) actions.stream()
+                .filter(action -> action.getActionType() == ActionType.QUESTION_NEEDS_CORRECTION)
+                .count();
     }
 }

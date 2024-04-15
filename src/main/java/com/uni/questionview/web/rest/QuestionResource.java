@@ -30,12 +30,44 @@ public class QuestionResource {
         this.actionService = actionService;
     }
 
-    @GetMapping("/allQuestions")
+    @GetMapping("/getSubmittedQuestions")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<List<SimplifiedQuestionDTO>> getAllQuestions() {
-        log.debug("REST request to get all Questions");
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getSubmittedQuestions() {
+        log.debug("REST request to get submitted questions");
 
-        return new ResponseEntity<>(questionService.getAllQuestions(), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.getSubmittedQuestions(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getPendingQuestions")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getPendingQuestions() {
+        log.debug("REST request to get pending questions");
+
+        return new ResponseEntity<>(questionService.getPendingQuestions(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getUserRejectedQuestions")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getRejectedQuestions() {
+        log.debug("REST request to get rejected questions");
+
+        return new ResponseEntity<>(questionService.getUserRejectedQuestions(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getUserQuestionsToCorrection")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<List<SimplifiedQuestionDTO>> getUserQuestionsToCorrection() {
+        log.debug("REST request to get pending questions");
+
+        return new ResponseEntity<>(questionService.getUserQuestionsToCorrection(), HttpStatus.OK);
+    }
+
+    @PostMapping("/correctedQuestion")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDTO> questionCorrection(@RequestBody AddQuestionDTO addQuestionDTO, @RequestParam String correctionComment) {
+        log.debug("REST post to correct Question");
+
+        return new ResponseEntity<>(questionService.correctQuestion(addQuestionDTO, correctionComment), HttpStatus.CREATED);
     }
 
     @PostMapping("/addQuestion")
@@ -62,12 +94,28 @@ public class QuestionResource {
         return new ResponseEntity<>(questionService.getQuestion(questionId), HttpStatus.OK);
     }
 
-    @GetMapping("/getQuestionDetails/{questionId}")
+    @GetMapping("/getSubmittedQuestionDetails/{questionId}")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<QuestionDetailsDTO> getQuestionDetails(@PathVariable long questionId) {
+    public ResponseEntity<QuestionDetailsDTO> getSubmittedQuestionDetails(@PathVariable long questionId) {
         log.debug("REST get question by id: {}", questionId);
 
-        return new ResponseEntity<>(questionService.getQuestionDetails(questionId), HttpStatus.OK);
+        return new ResponseEntity<>(questionService.getSubmittedQuestionDetails(questionId), HttpStatus.OK);
+    }
+
+    @GetMapping("/getPendingQuestionDetails/{questionId}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDetailsDTO> getPendingQuestionDetails(@PathVariable long questionId) {
+        log.debug("REST get question by id: {}", questionId);
+
+        return new ResponseEntity<>(questionService.getPendingQuestionDetails(questionId), HttpStatus.OK);
+    }
+
+    @GetMapping("/getRejectedQuestionDetails/{questionId}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDetailsDTO> getRejectedQuestionDetails(@PathVariable long questionId) {
+        log.debug("REST get question by id: {}", questionId);
+
+        return new ResponseEntity<>(questionService.getRejectedQuestionDetails(questionId), HttpStatus.OK);
     }
 
     @PostMapping("/addAction")
@@ -107,5 +155,11 @@ public class QuestionResource {
     public ResponseEntity<List<SimplifiedQuestionDTO>> removeQuestionFromUserList(@RequestParam long questionId) {
         log.debug("REST delete question with id {} from user list", questionId);
         return new ResponseEntity<>(questionService.removeQuestionFromUserList(questionId), HttpStatus.OK);
+    }
+
+    @PostMapping("/vote")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Integer> vote(@RequestBody ActionDTO actionDTO) {
+        return new ResponseEntity<>(questionService.voteForQuestion(actionDTO), HttpStatus.OK);
     }
 }

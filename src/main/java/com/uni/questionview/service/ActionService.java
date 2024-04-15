@@ -10,10 +10,12 @@ import com.uni.questionview.service.dto.ActionDTO;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 import com.uni.questionview.service.exceptions.UserNotFoundException;
 import com.uni.questionview.service.mapper.ActionMapper;
-import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
@@ -60,7 +62,58 @@ public class ActionService {
         return ActionEntity.builder()
                 .actionType(ActionType.QUESTION_EDIT)
                 .date(new Timestamp(System.currentTimeMillis()))
-                .comment("User "+ user.getLogin() +" has edited the question")
+                .comment("User "+ user.getLogin() +" has edited his question.\n" +
+                        "Question is back to PENDING")
+                .question(question)
+                .user(user)
+                .build();
+    }
+
+    public ActionEntity createCorrectionQuestionAction(QuestionEntity question, String correctionComment) {
+        User user = getCurrentLoggedUser();
+
+        return ActionEntity.builder()
+                .actionType(ActionType.QUESTION_CORRECTED)
+                .date(new Timestamp(System.currentTimeMillis()))
+                .comment("User "+ user.getLogin() +" has corrected his question. Question is back to PENDING\n"+
+                        "User comment: "+ correctionComment)
+                .question(question)
+                .user(user)
+                .build();
+    }
+
+    public ActionEntity createAcceptQuestionAction(QuestionEntity question) {
+        User user = getCurrentLoggedUser();
+
+        return ActionEntity.builder()
+                .actionType(ActionType.QUESTION_ACCEPT)
+                .date(new Timestamp(System.currentTimeMillis()))
+                .comment("User "+ user.getLogin() +" has voted for the question acceptation")
+                .question(question)
+                .user(user)
+                .build();
+    }
+
+    public ActionEntity createRejectQuestionAction(QuestionEntity question) {
+        User user = getCurrentLoggedUser();
+
+        return ActionEntity.builder()
+                .actionType(ActionType.QUESTION_REJECT)
+                .date(new Timestamp(System.currentTimeMillis()))
+                .comment("User "+ user.getLogin() +" has voted for the question rejection")
+                .question(question)
+                .user(user)
+                .build();
+    }
+
+    public ActionEntity createNeedCorrectionQuestionAction(QuestionEntity question, String correctionsReason) {
+        User user = getCurrentLoggedUser();
+
+        return ActionEntity.builder()
+                .actionType(ActionType.QUESTION_NEEDS_CORRECTION)
+                .date(new Timestamp(System.currentTimeMillis()))
+                .comment("User "+ user.getLogin() +" has voted for the question corrections.\n"
+                        +"Corrections reason: "+ correctionsReason)
                 .question(question)
                 .user(user)
                 .build();

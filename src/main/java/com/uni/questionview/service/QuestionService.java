@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -174,6 +175,11 @@ public class QuestionService {
         QuestionEntity questionFromDb = questionRepository.findById(addQuestionDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Question with id: "+ addQuestionDTO.getId() + " not found"));
 
+        ActionEntity editQuestionAction = actionRepository.save(actionService.createEditQuestionAction(questionFromDb));
+
+        List<ActionEntity> questionActions = Stream.concat(questionFromDb.getActions().stream(), Stream.of(editQuestionAction))
+                .toList();
+
         return QuestionEntity.builder()
                 .id(addQuestionDTO.getId())
                 .answerText(addQuestionDTO.getAnswerText())
@@ -184,7 +190,7 @@ public class QuestionService {
                 .timeEstimate(addQuestionDTO.getTimeEstimate())
                 .tags(tags)
                 .ratings(questionFromDb.getRatings())
-                .actions(questionFromDb.getActions())
+                .actions(questionActions)
                 .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
                 .build();
     }

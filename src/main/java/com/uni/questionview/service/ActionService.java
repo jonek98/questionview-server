@@ -54,6 +54,18 @@ public class ActionService {
                 .build();
     }
 
+    public ActionEntity createEditQuestionAction(QuestionEntity question) {
+        User user = getCurrentLoggedUser();
+
+        return ActionEntity.builder()
+                .actionType(ActionType.QUESTION_EDIT)
+                .date(new Timestamp(System.currentTimeMillis()))
+                .comment("User "+ user.getLogin() +" has edited the question")
+                .question(question)
+                .user(user)
+                .build();
+    }
+
     private User getCurrentLoggedUser() {
         return userService.getUserWithAuthorities()
             .orElseThrow(() -> new UserNotFoundException("Current logged user not found"));

@@ -6,6 +6,7 @@ import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.repository.ActionRepository;
 import com.uni.questionview.repository.QuestionRepository;
 import com.uni.questionview.service.dto.ActionDTO;
+import com.uni.questionview.service.dto.VoteStatus;
 import com.uni.questionview.service.exceptions.QuestionNotFoundException;
 
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class VotingService {
 
 
 
-    public int voteForQuestion(ActionDTO action) {
+    public VoteStatus voteForQuestion(ActionDTO action) {
         QuestionEntity questionEntity = questionRepository.findById(action.getQuestionId())
                 .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ action.getQuestionId() +" not found!"));
 
@@ -38,7 +39,7 @@ public class VotingService {
         }
     }
 
-    private int voteForQuestionAcceptation(QuestionEntity questionEntity) {
+    private VoteStatus voteForQuestionAcceptation(QuestionEntity questionEntity) {
         ActionEntity savedAcceptAction = actionRepository.save(actionService.createAcceptQuestionAction(questionEntity));
 
         questionEntity.getActions().add(savedAcceptAction);
@@ -46,10 +47,10 @@ public class VotingService {
         if (questionEntity.countNumberOfAcceptVotes() == NUMBER_OF_ACCEPTANCE_VOTES)
             questionRepository.save(questionEntity.withStatus(Status.ACCEPTED));
 
-        return questionEntity.countNumberOfAcceptVotes();
+        return questionEntity.getVoteStatus();
     }
 
-    private int voteForQuestionRejection(QuestionEntity questionEntity) {
+    private VoteStatus voteForQuestionRejection(QuestionEntity questionEntity) {
         ActionEntity savedRejectAction = actionRepository.save(actionService.createRejectQuestionAction(questionEntity));
 
         questionEntity.getActions().add(savedRejectAction);
@@ -57,10 +58,10 @@ public class VotingService {
         if (questionEntity.countNumberOfRejectVotes() == NUMBER_OF_REJECTION_VOTES)
             questionRepository.save(questionEntity.withStatus(Status.REJECTED));
 
-        return questionEntity.countNumberOfAcceptVotes();
+        return questionEntity.getVoteStatus();
     }
 
-    private int voteForQuestionCorrections(QuestionEntity questionEntity, String correctionComment) {
+    private VoteStatus voteForQuestionCorrections(QuestionEntity questionEntity, String correctionComment) {
         ActionEntity savedRejectAction = actionRepository.save(actionService.createNeedCorrectionQuestionAction(questionEntity, correctionComment));
 
         questionEntity.getActions().add(savedRejectAction);
@@ -68,6 +69,6 @@ public class VotingService {
         if (questionEntity.countNumberOfRejectVotes() == NUMBER_OF_CORRECTION_VOTES)
             questionRepository.save(questionEntity.withStatus(Status.NEEDS_CORRECTIONS));
 
-        return questionEntity.countNumberOfNeedCorrectionsVotes();
+        return questionEntity.getVoteStatus();
     }
 }

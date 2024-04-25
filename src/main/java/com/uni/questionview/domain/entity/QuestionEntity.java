@@ -5,6 +5,8 @@ import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.Language;
 import com.uni.questionview.domain.Status;
 import com.uni.questionview.domain.User;
+import com.uni.questionview.service.dto.VoteStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -107,5 +109,12 @@ public class QuestionEntity {
         return (int) actions.stream()
                 .filter(action -> action.getActionType() == ActionType.QUESTION_NEEDS_CORRECTION)
                 .count();
+    }
+
+    public VoteStatus getVoteStatus() {
+        return VoteStatus.of(
+                countNumberOfAcceptVotes(),
+                countNumberOfRejectVotes(),
+                countNumberOfNeedCorrectionsVotes());
     }
 }

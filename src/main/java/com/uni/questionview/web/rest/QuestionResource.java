@@ -3,6 +3,7 @@ package com.uni.questionview.web.rest;
 import com.uni.questionview.security.AuthoritiesConstants;
 import com.uni.questionview.service.ActionService;
 import com.uni.questionview.service.QuestionService;
+import com.uni.questionview.service.VotingService;
 import com.uni.questionview.service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +160,7 @@ public class QuestionResource {
 
     @PostMapping("/vote")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<Integer> vote(@RequestBody ActionDTO actionDTO) {
+    public ResponseEntity<VoteStatus> vote(@RequestBody ActionDTO actionDTO) {
         return new ResponseEntity<>(questionService.voteForQuestion(actionDTO), HttpStatus.OK);
     }
 }

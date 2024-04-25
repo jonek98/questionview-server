@@ -119,6 +119,14 @@ public class QuestionResource {
         return new ResponseEntity<>(questionService.getRejectedQuestionDetails(questionId), HttpStatus.OK);
     }
 
+    @GetMapping("/getCorrectionQuestionDetails/{questionId}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<QuestionDetailsDTO> getNeedCorrectionQuestionDetails(@PathVariable long questionId) {
+        log.debug("REST get question by id: {}", questionId);
+
+        return new ResponseEntity<>(questionService.getCorrectionQuestionDetails(questionId), HttpStatus.OK);
+    }
+
     @PostMapping("/addAction")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<ActionDTO> addAction(@RequestBody ActionDTO actionDTO) {

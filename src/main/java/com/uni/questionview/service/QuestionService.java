@@ -144,6 +144,14 @@ public class QuestionService {
                         " has been rejected or does not exist."));
     }
 
+    public QuestionDetailsDTO getCorrectionQuestionDetails(Long questionId) {
+        return questionRepository.findById(questionId)
+                .filter(question -> question.getStatus() == Status.NEEDS_CORRECTIONS)
+                .map(questionMapper::mapToQuestionDetailsDTO)
+                .orElseThrow(() -> new QuestionRejectedException("Question with id: " + questionId +
+                        " need corrections or does not exist."));
+    }
+
     public RatingDTO addRating(RatingDTO ratingDTO) {
         QuestionEntity questionEntity = questionRepository.findById(ratingDTO.getQuestionId())
                 .orElseThrow(() -> new QuestionNotFoundException("Question with id not found: " + ratingDTO.getQuestionId()));
@@ -206,7 +214,7 @@ public class QuestionService {
         return getQuestionsFromUserList();
     }
 
-    public int voteForQuestion(ActionDTO actionDTO) {
+    public VoteStatus voteForQuestion(ActionDTO actionDTO) {
         return votingService.voteForQuestion(actionDTO);
     }
 
@@ -236,6 +244,7 @@ public class QuestionService {
                 .build();
     }
 
+    @Transactional
     private QuestionEntity createEditedQuestion(AddQuestionDTO addQuestionDTO) {
         List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
 
@@ -247,9 +256,10 @@ public class QuestionService {
         List<ActionEntity> questionActions = Stream.concat(questionFromDb.getActions().stream(), Stream.of(editQuestionAction))
                 .toList();
 
+        ratingRepository.deleteAll(questionFromDb.getRatings());
         questionFromDb.getRatings().clear();
 
-        return QuestionEntity.builder()
+        return questionRepository.save(QuestionEntity.builder()
                 .id(addQuestionDTO.getId())
                 .answerText(addQuestionDTO.getAnswerText())
                 .questionText(addQuestionDTO.getQuestionText())
@@ -262,7 +272,7 @@ public class QuestionService {
                 .actions(questionActions)
                 .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
                 .status(Status.PENDING)
-                .build();
+                .build());
     }
 
     private QuestionEntity createCorrectedQuestion(AddQuestionDTO addQuestionDTO, String correctionComment) {

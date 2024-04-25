@@ -288,7 +288,6 @@ public class QuestionService {
 
         questionFromDb.getRatings().clear();
 
-
         return QuestionEntity.builder()
                 .id(addQuestionDTO.getId())
                 .answerText(addQuestionDTO.getAnswerText())

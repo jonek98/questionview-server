@@ -15,5 +15,5 @@ public class VoteStatus {
     @Max(3)
     private int rejectVotesNumber;
     @Max(1)
-    private int statusChangeVotesNumber;
+    private int correctionVotesNumber;
 }

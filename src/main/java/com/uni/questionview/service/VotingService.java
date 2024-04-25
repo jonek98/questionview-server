@@ -66,7 +66,7 @@ public class VotingService {
 
         questionEntity.getActions().add(savedRejectAction);
 
-        if (questionEntity.countNumberOfRejectVotes() == NUMBER_OF_CORRECTION_VOTES)
+        if (questionEntity.countNumberOfNeedCorrectionsVotes() == NUMBER_OF_CORRECTION_VOTES)
             questionRepository.save(questionEntity.withStatus(Status.NEEDS_CORRECTIONS));
 
         return questionEntity.getVoteStatus();

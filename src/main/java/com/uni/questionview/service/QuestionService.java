@@ -83,8 +83,8 @@ public class QuestionService {
                 .toList();
     }
 
-    public QuestionDTO correctQuestion(AddQuestionDTO addQuestionDTO, String correctionComment) {
-        QuestionEntity correctedQuestion = this.createCorrectedQuestion(addQuestionDTO, correctionComment);
+    public QuestionDTO correctQuestion(AddQuestionDTO addQuestionDTO) {
+        QuestionEntity correctedQuestion = this.createCorrectedQuestion(addQuestionDTO);
 
         QuestionEntity updatedQuestion = questionRepository.save(correctedQuestion);
 
@@ -275,13 +275,13 @@ public class QuestionService {
                 .build());
     }
 
-    private QuestionEntity createCorrectedQuestion(AddQuestionDTO addQuestionDTO, String correctionComment) {
+    private QuestionEntity createCorrectedQuestion(AddQuestionDTO addQuestionDTO) {
         List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
 
         QuestionEntity questionFromDb = questionRepository.findById(addQuestionDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Question with id: "+ addQuestionDTO.getId() + " not found"));
 
-        ActionEntity correctionQuestionAction = actionRepository.save(actionService.createCorrectionQuestionAction(questionFromDb, correctionComment));
+        ActionEntity correctionQuestionAction = actionRepository.save(actionService.createCorrectionQuestionAction(questionFromDb));
 
         List<ActionEntity> questionActions = Stream.concat(questionFromDb.getActions().stream(), Stream.of(correctionQuestionAction))
                 .toList();

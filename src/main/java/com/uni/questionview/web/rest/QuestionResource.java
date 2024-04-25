@@ -65,10 +65,10 @@ public class QuestionResource {
 
     @PostMapping("/correctedQuestion")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<QuestionDTO> questionCorrection(@RequestBody AddQuestionDTO addQuestionDTO, @RequestParam String correctionComment) {
+    public ResponseEntity<QuestionDTO> questionCorrection(@RequestBody AddQuestionDTO addQuestionDTO) {
         log.debug("REST post to correct Question");
 
-        return new ResponseEntity<>(questionService.correctQuestion(addQuestionDTO, correctionComment), HttpStatus.CREATED);
+        return new ResponseEntity<>(questionService.correctQuestion(addQuestionDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/addQuestion")

@@ -69,14 +69,13 @@ public class ActionService {
                 .build();
     }
 
-    public ActionEntity createCorrectionQuestionAction(QuestionEntity question, String correctionComment) {
+    public ActionEntity createCorrectionQuestionAction(QuestionEntity question) {
         User user = getCurrentLoggedUser();
 
         return ActionEntity.builder()
                 .actionType(ActionType.QUESTION_CORRECTED)
                 .date(new Timestamp(System.currentTimeMillis()))
-                .comment("User "+ user.getLogin() +" has corrected his question. Question is back to PENDING\n"+
-                        "User comment: "+ correctionComment)
+                .comment("User "+ user.getLogin() +" has corrected his question. Question is back to PENDING")
                 .question(question)
                 .user(user)
                 .build();

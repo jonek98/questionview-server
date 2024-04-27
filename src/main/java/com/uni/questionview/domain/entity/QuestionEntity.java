@@ -46,7 +46,6 @@ public class QuestionEntity {
     @Column(name = "status")
     private Status status;
 
-
     private String summary;
 
     private Language language;
@@ -59,11 +58,11 @@ public class QuestionEntity {
     @JoinColumn(name = "tag_id"))
     private List<TagEntity> tags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<ActionEntity> actions;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<RatingEntity> ratings;
 
     @JsonIgnore

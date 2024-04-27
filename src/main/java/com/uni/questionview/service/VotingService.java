@@ -1,6 +1,8 @@
 package com.uni.questionview.service;
 
+import com.uni.questionview.domain.ActionType;
 import com.uni.questionview.domain.Status;
+import com.uni.questionview.domain.User;
 import com.uni.questionview.domain.entity.ActionEntity;
 import com.uni.questionview.domain.entity.QuestionEntity;
 import com.uni.questionview.repository.ActionRepository;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 
+import java.util.Set;
+
 @Service
 @AllArgsConstructor
 public class VotingService {
@@ -20,6 +24,7 @@ public class VotingService {
     private final QuestionRepository questionRepository;
     private final ActionRepository actionRepository;
     private final ActionService actionService;
+    private final UserService userService;
 
     private static final int NUMBER_OF_ACCEPTANCE_VOTES = 3;
     private static final int NUMBER_OF_REJECTION_VOTES = 3;
@@ -30,6 +35,10 @@ public class VotingService {
     public VoteStatus voteForQuestion(ActionDTO action) {
         QuestionEntity questionEntity = questionRepository.findById(action.getQuestionId())
                 .orElseThrow(() -> new QuestionNotFoundException("Question with id: "+ action.getQuestionId() +" not found!"));
+
+//        if (isUserAlreadyVoted(questionEntity))
+//            throw new UserAlreadyVotedForQuestionException("User "+ userService.getUserWithAuthorities().get().getLogin() +
+//                " already voted for question with id: "+ questionEntity.getId());
 
         switch (action.getActionType()) {
             case QUESTION_ACCEPT -> {return voteForQuestionAcceptation(questionEntity);}
@@ -70,5 +79,16 @@ public class VotingService {
             questionRepository.save(questionEntity.withStatus(Status.NEEDS_CORRECTIONS));
 
         return questionEntity.getVoteStatus();
+    }
+
+    private boolean isUserAlreadyVoted(QuestionEntity questionEntity) {
+        Set<ActionType> voteActions = Set.of(ActionType.QUESTION_ACCEPT, ActionType.QUESTION_REJECT, ActionType.QUESTION_NEEDS_CORRECTION);
+        User currentLoggedUser = userService.getUserWithAuthorities().get();
+
+        return questionEntity.getActions()
+            .stream()
+            .anyMatch(action ->
+                voteActions.contains(action.getActionType())
+                    && action.getUser().getLogin().equals(currentLoggedUser.getLogin()));
     }
 }

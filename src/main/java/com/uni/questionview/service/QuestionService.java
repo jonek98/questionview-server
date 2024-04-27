@@ -245,7 +245,7 @@ public class QuestionService {
     }
 
     @Transactional
-    private QuestionEntity createEditedQuestion(AddQuestionDTO addQuestionDTO) {
+    protected QuestionEntity createEditedQuestion(AddQuestionDTO addQuestionDTO) {
         List<TagEntity> tags = tagRepository.findAllById(addQuestionDTO.getTagIds());
 
         QuestionEntity questionFromDb = questionRepository.findById(addQuestionDTO.getId())
@@ -257,7 +257,6 @@ public class QuestionService {
                 .toList();
 
         ratingRepository.deleteAll(questionFromDb.getRatings());
-        questionFromDb.getRatings().clear();
 
         return questionRepository.save(QuestionEntity.builder()
                 .id(addQuestionDTO.getId())
@@ -268,7 +267,7 @@ public class QuestionService {
                 .language(addQuestionDTO.getLanguage())
                 .timeEstimate(addQuestionDTO.getTimeEstimate())
                 .tags(tags)
-                .ratings(questionFromDb.getRatings())
+                .ratings(Collections.emptyList())
                 .actions(questionActions)
                 .usersWithQuestionOnList(questionFromDb.getUsersWithQuestionOnList())
                 .status(Status.PENDING)

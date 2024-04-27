@@ -29,7 +29,7 @@ public class RatingEntity {
     @ManyToOne
     private User user;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinTable(
             name = "question_rating",
             joinColumns = @JoinColumn(name = "rating_id"),

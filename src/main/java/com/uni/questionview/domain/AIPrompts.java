@@ -36,8 +36,8 @@ public enum AIPrompts {
       ]
     }
 
-    Please ensure the questions are tailored to the applicant's background and are likely to elicit informative responses that would be relevant to assessing their suitability for the position.
-    """);
+    Please ensure the questions are tailored to the applicant's background and are likely to elicit informative responses that would be relevant to assessing their suitability for the position. 
+    Return answer in json format without ```json text .....""");
 
     private final String prompt;
 
